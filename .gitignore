@@ -1,0 +1,45 @@
+# --- Go ---
+# Binaries
+/bin/
+/out/
+/dist/
+*.exe
+*.so
+*.dll
+
+# Dependency directories
+/vendor/
+
+# IDE/Editor files
+.idea/
+.vscode/
+.github/
+*.swp
+*.swo
+*~
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Test and debug files
+*.test
+*.prof
+*.pprof
+*.log
+coverage.out
+coverage.html
+lint-report.xml
+
+# Build cache
+/.cache/
+/go-build/
+__debug_bin
+
+# Environment files
+local.yaml
+.env
+.env.local
+*.env
+workfile*
+/CLAUDE.local.md
