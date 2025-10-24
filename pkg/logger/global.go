@@ -24,13 +24,13 @@ func SetGlobal(cfg Config) {
 
 		logger, err := New(cfg)
 		if err != nil {
-			panic("failed to initialize global logger: " + err.Error())
+			panic("[logger]: failed to initialize global logger: " + err.Error())
 		}
 		global.Store(logger)
 		called = true
 	})
 	if !called {
-		panic("SetGlobalLogger can only be called once")
+		panic("[logger]: SetGlobal can only be called once")
 	}
 }
 
@@ -126,7 +126,7 @@ func initDefault() {
 			Encoding: encPretty,
 		})
 		if err != nil {
-			panic("failed to initialize default logger: " + err.Error())
+			panic("[logger]: failed to initialize default logger: " + err.Error())
 		}
 		global.Store(defaultLogger)
 	})
@@ -138,14 +138,14 @@ func getGlobal() Logger {
 	if l := global.Load(); l != nil {
 		logger, ok := l.(Logger)
 		if !ok {
-			panic("logger: globalLogger contains invalid type")
+			panic("[logger]: global contains invalid type")
 		}
 		return logger
 	}
 	initDefault()
 	logger, ok := global.Load().(Logger)
 	if !ok {
-		panic("logger: globalLogger contains invalid type after initialization")
+		panic("[logger]: global contains invalid type after initialization")
 	}
 	return logger
 }
