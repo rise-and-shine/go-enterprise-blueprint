@@ -3,6 +3,7 @@ package logger
 
 import (
 	"context"
+	"errors"
 
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/meta"
@@ -34,6 +35,11 @@ type Logger interface {
 	// Fatalf logs a formatted message at fatal level and then calls os.Exit(1).
 	Fatalf(format string, args ...any)
 
+	// Warnx is a special method for easy logging errx.ErrorX instances at warn level.
+	Warnx(err error)
+	// Errorx is a special method for easy logging errx.ErrorX instances at error level.
+	Errorx(err error)
+
 	// With creates a new logger with the given key-value pairs.
 	// The returned logger inherits the properties of the original logger
 	// and includes the provided key-value pairs in all subsequent log entries.
@@ -57,6 +63,10 @@ type logger struct {
 
 // New creates a new Logger instance with the provided configuration.
 func New(cfg Config) (Logger, error) {
+	if cfg.Disable {
+		return &logger{zap.NewNop().Sugar()}, nil
+	}
+
 	zapConfig, err := cfg.getZapConfig()
 	if err != nil {
 		return nil, errx.Wrap(err)
@@ -74,6 +84,36 @@ func New(cfg Config) (Logger, error) {
 	}
 
 	return &logger{jsonLogger.Sugar()}, nil
+}
+
+func (l *logger) Warnx(err error) {
+	var e errx.ErrorX
+	if errors.As(err, &e) {
+		l.With(
+			"error_code", e.Code(),
+			"error_type", e.Type().String(),
+			"error_trace", e.Trace(),
+			"error_fields", e.Fields(),
+			"error_details", e.Details(),
+		).Warn(err.Error())
+		return
+	}
+	l.Warn(err.Error())
+}
+
+func (l *logger) Errorx(err error) {
+	var e errx.ErrorX
+	if errors.As(err, &e) {
+		l.With(
+			"error_code", e.Code(),
+			"error_type", e.Type().String(),
+			"error_trace", e.Trace(),
+			"error_fields", e.Fields(),
+			"error_details", e.Details(),
+		).Error(err.Error())
+		return
+	}
+	l.Error(err.Error())
 }
 
 func (l *logger) With(keysAndValues ...any) Logger {

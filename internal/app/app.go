@@ -9,6 +9,8 @@ import (
 
 	"go-enterprise-blueprint/pkg/cfgloader"
 	"go-enterprise-blueprint/pkg/logger"
+
+	"github.com/code19m/errx"
 )
 
 type App struct{}
@@ -43,6 +45,17 @@ func Build() *App {
 	logger.Warn("i'm just warning you, there is something not ok")
 
 	logger.With("error", errors.New("simulated error")).Error("something went wrong here")
+
+	err = errx.New(
+		"qwer",
+		errx.WithCode("qwer_code"),
+		errx.WithType(errx.T_Throttling),
+	)
+
+	err = errx.Wrap(err)
+	err = errx.Wrap(err)
+
+	logger.Warnx(err)
 
 	return &App{}
 }

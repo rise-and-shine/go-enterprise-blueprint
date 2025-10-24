@@ -29,24 +29,28 @@ const (
 	errorValColor = "\033[38;2;254;202;202m"
 )
 
+//nolint:gochecknoglobals // palette is a static lookup shared across encoder instances.
 var levelPalette = map[zapcore.Level]string{
-	zapcore.DebugLevel:  "\033[38;2;129;140;248m",
-	zapcore.InfoLevel:   "\033[38;2;16;185;129m",
-	zapcore.WarnLevel:   "\033[38;2;245;158;11m",
-	zapcore.ErrorLevel:  "\033[38;2;248;113;113m",
-	zapcore.DPanicLevel: "\033[38;2;244;63;94m",
-	zapcore.PanicLevel:  "\033[38;2;244;63;94m",
-	zapcore.FatalLevel:  "\033[38;2;217;70;239m",
+	zapcore.DebugLevel:   "\033[38;2;129;140;248m",
+	zapcore.InfoLevel:    "\033[38;2;16;185;129m",
+	zapcore.WarnLevel:    "\033[38;2;245;158;11m",
+	zapcore.ErrorLevel:   "\033[38;2;248;113;113m",
+	zapcore.DPanicLevel:  "\033[38;2;244;63;94m",
+	zapcore.PanicLevel:   "\033[38;2;244;63;94m",
+	zapcore.FatalLevel:   "\033[38;2;217;70;239m",
+	zapcore.InvalidLevel: textColor,
 }
 
+//nolint:gochecknoglobals // emoji mapping is static and reused for all encoders.
 var levelEmoji = map[zapcore.Level]string{
-	zapcore.DebugLevel:  "🧪",
-	zapcore.InfoLevel:   "ℹ️ ", // added space for alignment
-	zapcore.WarnLevel:   "⚠️ ", // added space for alignment
-	zapcore.ErrorLevel:  "🚨",
-	zapcore.DPanicLevel: "🚨",
-	zapcore.PanicLevel:  "🚨",
-	zapcore.FatalLevel:  "💥",
+	zapcore.DebugLevel:   "🧪",
+	zapcore.InfoLevel:    "ℹ️ ", // added space for alignment
+	zapcore.WarnLevel:    "⚠️ ", // added space for alignment
+	zapcore.ErrorLevel:   "🚨",
+	zapcore.DPanicLevel:  "🚨",
+	zapcore.PanicLevel:   "🚨",
+	zapcore.FatalLevel:   "💥",
+	zapcore.InvalidLevel: "",
 }
 
 // prettyLogger wraps zap's JSON encoder to produce colorized, indented output suited for terminals.
@@ -102,17 +106,25 @@ func (e *prettyLogger) EncodeEntry(entry zapcore.Entry, fields []zapcore.Field) 
 
 	trimmed := bytes.TrimSpace(raw)
 	var payload map[string]any
-	if err := json.Unmarshal(trimmed, &payload); err != nil {
-		jsonBuf.Write(raw)
+	if unmarshalErr := json.Unmarshal(trimmed, &payload); unmarshalErr != nil {
+		if writeErr := writeBytes(jsonBuf, raw); writeErr != nil {
+			return nil, writeErr
+		}
 		if len(raw) == 0 || raw[len(raw)-1] != '\n' {
-			jsonBuf.WriteByte('\n')
+			if newlineErr := writeByte(jsonBuf, '\n'); newlineErr != nil {
+				return nil, newlineErr
+			}
 		}
 		return jsonBuf, nil
 	}
 
-	jsonBuf.WriteString(buildHeader(entry, payload))
+	if headerErr := writeString(jsonBuf, buildHeader(entry, payload)); headerErr != nil {
+		return nil, headerErr
+	}
 	meta := filterReserved(payload)
-	writeMetadata(jsonBuf, meta, entry.Level)
+	if metadataErr := writeMetadata(jsonBuf, meta, entry.Level); metadataErr != nil {
+		return nil, metadataErr
+	}
 
 	return jsonBuf, nil
 }
@@ -155,8 +167,8 @@ func headerTimestamp(entry zapcore.Entry) string {
 
 func headerLevel(entry zapcore.Entry, payload map[string]any) string {
 	value := strings.ToUpper(entry.Level.String())
-	if lvlVal, ok := payload[levelKey]; ok {
-		if lvlText, ok := lvlVal.(string); ok && lvlText != "" {
+	if lvlVal, hasLevel := payload[levelKey]; hasLevel {
+		if lvlText, okString := lvlVal.(string); okString && lvlText != "" {
 			value = strings.ToUpper(lvlText)
 		}
 	}
@@ -165,8 +177,8 @@ func headerLevel(entry zapcore.Entry, payload map[string]any) string {
 
 func headerMessage(entry zapcore.Entry, payload map[string]any) string {
 	value := entry.Message
-	if msgVal, ok := payload[messageKey]; ok {
-		if msgText, ok := msgVal.(string); ok {
+	if msgVal, hasMessage := payload[messageKey]; hasMessage {
+		if msgText, okString := msgVal.(string); okString {
 			value = msgText
 		}
 	}
@@ -174,8 +186,8 @@ func headerMessage(entry zapcore.Entry, payload map[string]any) string {
 }
 
 func resolveCaller(entry zapcore.Entry, payload map[string]any) string {
-	if callerVal, ok := payload[callerKey]; ok {
-		if callerText, ok := callerVal.(string); ok && callerText != "" {
+	if callerVal, hasCaller := payload[callerKey]; hasCaller {
+		if callerText, okString := callerVal.(string); okString && callerText != "" {
 			return callerText
 		}
 	}
@@ -203,31 +215,41 @@ func filterReserved(payload map[string]any) map[string]any {
 	return meta
 }
 
-func writeMetadata(buf *buffer.Buffer, meta map[string]any, level zapcore.Level) {
+func writeMetadata(buf *buffer.Buffer, meta map[string]any, level zapcore.Level) error {
 	if len(meta) == 0 {
-		return
+		return nil
 	}
 
 	keyColor, valColor := metaColours(level)
 	pretty, err := json.MarshalIndent(meta, "", "  ")
 	if err != nil {
-		buf.WriteString(ansiFaint + valColor + metaFallback(meta) + ansiReset)
-		buf.WriteByte('\n')
-		return
+		if fallbackWriteErr := writeString(buf, ansiFaint+valColor+metaFallback(meta)+ansiReset); fallbackWriteErr != nil {
+			return fallbackWriteErr
+		}
+		return writeByte(buf, '\n')
 	}
 
 	lines := bytes.Split(pretty, []byte("\n"))
+	written := false
 	for i, line := range lines {
 		formatted := styleMetaLine(line, keyColor, valColor)
 		if formatted == "" {
 			continue
 		}
-		buf.WriteString(formatted)
+		if lineWriteErr := writeString(buf, formatted); lineWriteErr != nil {
+			return lineWriteErr
+		}
+		written = true
 		if i < len(lines)-1 {
-			buf.WriteByte('\n')
+			if newlineErr := writeByte(buf, '\n'); newlineErr != nil {
+				return newlineErr
+			}
 		}
 	}
-	buf.WriteByte('\n')
+	if !written {
+		return nil
+	}
+	return writeByte(buf, '\n')
 }
 
 func styleLevel(level string, lvl zapcore.Level) string {
@@ -260,6 +282,8 @@ func messageColour(level zapcore.Level) string {
 		return warnValColor
 	case zapcore.ErrorLevel, zapcore.DPanicLevel, zapcore.PanicLevel, zapcore.FatalLevel:
 		return errorValColor
+	case zapcore.DebugLevel, zapcore.InfoLevel, zapcore.InvalidLevel:
+		return textColor
 	default:
 		return textColor
 	}
@@ -279,6 +303,8 @@ func metaColours(level zapcore.Level) (string, string) {
 		return warnKeyColor, warnValColor
 	case zapcore.ErrorLevel, zapcore.DPanicLevel, zapcore.PanicLevel, zapcore.FatalLevel:
 		return errorKeyColor, errorValColor
+	case zapcore.DebugLevel, zapcore.InfoLevel, zapcore.InvalidLevel:
+		return metaKeyColor, metaValColor
 	default:
 		return metaKeyColor, metaValColor
 	}
@@ -301,4 +327,18 @@ func styleMetaLine(line []byte, keyColor, valColor string) string {
 	key := string(trimmed[:colonIdx])
 	rest := string(trimmed[colonIdx+1:])
 	return indent + keyColor + key + ansiReset + ":" + ansiFaint + valColor + rest + ansiReset
+}
+
+func writeBytes(buf *buffer.Buffer, data []byte) error {
+	_, err := buf.Write(data)
+	return err
+}
+
+func writeString(buf *buffer.Buffer, value string) error {
+	_, err := buf.WriteString(value)
+	return err
+}
+
+func writeByte(buf *buffer.Buffer, b byte) error { //nolint:unparam // byte value varies as we add more formatting
+	return buf.WriteByte(b)
 }
