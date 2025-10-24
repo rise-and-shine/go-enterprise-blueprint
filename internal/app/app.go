@@ -23,6 +23,9 @@ type logEntry struct {
 
 func Build() *App {
 	cfg := cfgloader.MustLoad[config.Config]()
+
+	logger.SetGlobal(cfg.Logger)
+
 	logger, err := logger.New(cfg.Logger)
 	if err != nil {
 		slog.Error("failed to initialize logger", "error", err)
@@ -66,6 +69,6 @@ func (a *App) RunAllInOne() {
 
 	for range ticker.C {
 		// Simulate doing work
-		slog.Info("running...")
+		logger.Info("running...")
 	}
 }

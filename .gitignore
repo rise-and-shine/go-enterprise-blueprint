@@ -14,6 +14,7 @@
 .idea/
 .vscode/
 .github/
+.claude/
 *.swp
 *.swo
 *~

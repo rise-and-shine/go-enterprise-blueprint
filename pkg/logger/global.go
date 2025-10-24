@@ -8,15 +8,15 @@ import (
 
 //nolint:gochecknoglobals // Global variables are required for the global logger singleton pattern
 var (
-	globalLogger atomic.Value // stores Logger
-	setOnce      sync.Once    // ensures SetGlobalLogger is called once
-	initOnce     sync.Once    // ensures lazy initialization happens once
+	global   atomic.Value // stores Logger
+	setOnce  sync.Once    // ensures SetGlobalLogger is called once
+	initOnce sync.Once    // ensures lazy initialization happens once
 )
 
-// SetGlobalLogger sets the global logger instance.
+// SetGlobal sets the global logger instance.
 // This should be called during application startup to configure the global logger.
 // This should be called before any logging functions are used.
-func SetGlobalLogger(cfg Config) {
+func SetGlobal(cfg Config) {
 	called := false
 	setOnce.Do(func() {
 		// Prevent lazy initialization from happening after this
@@ -26,7 +26,7 @@ func SetGlobalLogger(cfg Config) {
 		if err != nil {
 			panic("failed to initialize global logger: " + err.Error())
 		}
-		globalLogger.Store(logger)
+		global.Store(logger)
 		called = true
 	})
 	if !called {
@@ -36,90 +36,90 @@ func SetGlobalLogger(cfg Config) {
 
 // Debug logs a message at debug level using the global logger.
 func Debug(args ...any) {
-	getGlobalLogger().Debug(args...)
+	getGlobal().Debug(args...)
 }
 
 // Info logs a message at info level using the global logger.
 func Info(args ...any) {
-	getGlobalLogger().Info(args...)
+	getGlobal().Info(args...)
 }
 
 // Warn logs a message at warn level using the global logger.
 func Warn(args ...any) {
-	getGlobalLogger().Warn(args...)
+	getGlobal().Warn(args...)
 }
 
 // Error logs a message at error level using the global logger.
 func Error(args ...any) {
-	getGlobalLogger().Error(args...)
+	getGlobal().Error(args...)
 }
 
 // Fatal logs a message at fatal level using the global logger and then calls os.Exit(1).
 func Fatal(args ...any) {
-	getGlobalLogger().Fatal(args...)
+	getGlobal().Fatal(args...)
 }
 
 // Debugf logs a formatted message at debug level using the global logger.
 func Debugf(format string, args ...any) {
-	getGlobalLogger().Debugf(format, args...)
+	getGlobal().Debugf(format, args...)
 }
 
 // Infof logs a formatted message at info level using the global logger.
 func Infof(format string, args ...any) {
-	getGlobalLogger().Infof(format, args...)
+	getGlobal().Infof(format, args...)
 }
 
 // Warnf logs a formatted message at warn level using the global logger.
 func Warnf(format string, args ...any) {
-	getGlobalLogger().Warnf(format, args...)
+	getGlobal().Warnf(format, args...)
 }
 
 // Errorf logs a formatted message at error level using the global logger.
 func Errorf(format string, args ...any) {
-	getGlobalLogger().Errorf(format, args...)
+	getGlobal().Errorf(format, args...)
 }
 
 // Fatalf logs a formatted message at fatal level using the global logger and then calls os.Exit(1).
 func Fatalf(format string, args ...any) {
-	getGlobalLogger().Fatalf(format, args...)
+	getGlobal().Fatalf(format, args...)
 }
 
 // Warnx logs an errx.ErrorX instance at warn level using the global logger.
 func Warnx(err error) {
-	getGlobalLogger().Warnx(err)
+	getGlobal().Warnx(err)
 }
 
 // Errorx logs an errx.ErrorX instance at error level using the global logger.
 func Errorx(err error) {
-	getGlobalLogger().Errorx(err)
+	getGlobal().Errorx(err)
 }
 
 // With creates a new logger with the given key-value pairs using the global logger.
 // The returned logger inherits the properties of the global logger
 // and includes the provided key-value pairs in all subsequent log entries.
 func With(keysAndValues ...any) Logger {
-	return getGlobalLogger().With(keysAndValues...)
+	return getGlobal().With(keysAndValues...)
 }
 
 // WithContext creates a logger with context information using the global logger,
 // enriching the log entries with metadata from the context.
 func WithContext(ctx context.Context) Logger {
-	return getGlobalLogger().WithContext(ctx)
+	return getGlobal().WithContext(ctx)
 }
 
 // Named adds a sub-scope to the logger's name using the global logger.
 func Named(name string) Logger {
-	return getGlobalLogger().Named(name)
+	return getGlobal().Named(name)
 }
 
 // Sync flushes any buffered log entries from the global logger.
 // Intended for use on application shutdown to ensure all logs are written.
 func Sync() error {
-	return getGlobalLogger().Sync()
+	return getGlobal().Sync()
 }
 
-// initDefaultLogger initializes the default logger lazily.
-func initDefaultLogger() {
+// initDefault initializes the default logger lazily.
+func initDefault() {
 	initOnce.Do(func() {
 		defaultLogger, err := New(Config{
 			Level:    levelDebug,
@@ -128,22 +128,22 @@ func initDefaultLogger() {
 		if err != nil {
 			panic("failed to initialize default logger: " + err.Error())
 		}
-		globalLogger.Store(defaultLogger)
+		global.Store(defaultLogger)
 	})
 }
 
-// getGlobalLogger returns the current global logger instance.
+// getGlobal returns the current global logger instance.
 // If no logger has been set, it initializes a default logger lazily.
-func getGlobalLogger() Logger {
-	if l := globalLogger.Load(); l != nil {
+func getGlobal() Logger {
+	if l := global.Load(); l != nil {
 		logger, ok := l.(Logger)
 		if !ok {
 			panic("logger: globalLogger contains invalid type")
 		}
 		return logger
 	}
-	initDefaultLogger()
-	logger, ok := globalLogger.Load().(Logger)
+	initDefault()
+	logger, ok := global.Load().(Logger)
 	if !ok {
 		panic("logger: globalLogger contains invalid type after initialization")
 	}

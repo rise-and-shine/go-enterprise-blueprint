@@ -21,7 +21,7 @@ func main() {
 	// cron manager
 	// ...add cron manager run command here...
 
-	// ignoring error since it's already displayed to stdout by cobra.
+	// ignoring error since it's already displayed by cobra.
 	_ = root.Execute()
 }
 
