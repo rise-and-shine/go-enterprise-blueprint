@@ -9,7 +9,7 @@ import (
 //nolint:gochecknoglobals // Global variables are required for the global logger singleton pattern
 var (
 	global   atomic.Value // stores Logger
-	setOnce  sync.Once    // ensures SetGlobalLogger is called once
+	setOnce  sync.Once    // ensures SetGlobal is called once
 	initOnce sync.Once    // ensures lazy initialization happens once
 )
 
