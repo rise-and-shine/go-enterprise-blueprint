@@ -121,6 +121,7 @@ func Sync() error {
 // initDefault initializes the default logger lazily.
 func initDefault() {
 	initOnce.Do(func() {
+		// TODO: correct caller skip for global logger
 		defaultLogger, err := New(Config{
 			Level:    levelDebug,
 			Encoding: encPretty,
