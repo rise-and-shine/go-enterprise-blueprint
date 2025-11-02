@@ -21,11 +21,11 @@ type CreateUserResponse struct {
 }
 
 type state struct {
-	req  CreateUserRequest
+	req  *CreateUserRequest
 	user user.User
 }
 
-type UseCase ucdef.UserWriteAction[CreateUserRequest, *CreateUserResponse, *state]
+type UseCase ucdef.UserWriteAction[CreateUserRequest, CreateUserResponse, *state]
 
 func New(dc domain.Container, sc service.Container, pc portal.Container) UseCase {
 	return &useCase{dc, sc, pc}
@@ -41,7 +41,7 @@ func (uc useCase) OperationID() string {
 	return "uc-1001-create-user"
 }
 
-func (uc useCase) Validate(_ context.Context, req CreateUserRequest) (*state, error) {
+func (uc useCase) Validate(_ context.Context, req *CreateUserRequest) (*state, error) {
 	// validate input
 	return &state{req, user.User{}}, nil
 }

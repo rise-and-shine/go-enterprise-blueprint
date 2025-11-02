@@ -7,10 +7,9 @@ import (
 	"os"
 	"time"
 
-	"go-enterprise-blueprint/pkg/cfgloader"
-	"go-enterprise-blueprint/pkg/logger"
-
 	"github.com/code19m/errx"
+	"github.com/rise-and-shine/pkg/cfgloader"
+	"github.com/rise-and-shine/pkg/logger"
 )
 
 type App struct{}

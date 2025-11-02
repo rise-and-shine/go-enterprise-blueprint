@@ -12,15 +12,15 @@ type AuditInfo struct {
 type UserReadAction[I, O, S any] interface {
 	OperationID() string
 
-	Validate(context.Context, I) (S, error)
-	Execute(context.Context, S) (O, error)
+	Validate(context.Context, *I) (S, error)
+	Execute(context.Context, S) (*O, error)
 }
 
 type UserWriteAction[I, O, S any] interface {
 	OperationID() string
 
-	Validate(context.Context, I) (S, error)
-	Execute(context.Context, S) (O, error)
+	Validate(context.Context, *I) (S, error)
+	Execute(context.Context, S) (*O, error)
 
 	AuditInfo(S) AuditInfo
 }
@@ -28,7 +28,7 @@ type UserWriteAction[I, O, S any] interface {
 type EventConsumer[E, S any] interface {
 	OperationID() string
 
-	Validate(context.Context, E) (S, error)
+	EnsureIntegrity(context.Context, E) (S, error)
 	Execute(context.Context, S) error
 
 	AuditInfo(S) AuditInfo
@@ -37,7 +37,7 @@ type EventConsumer[E, S any] interface {
 type BackgroundTask[T, S any] interface {
 	OperationID() string
 
-	Validate(context.Context, T) (S, error)
+	EnsureIntegrity(context.Context, T) (S, error)
 	Execute(context.Context, S) error
 
 	AuditInfo(S) AuditInfo
