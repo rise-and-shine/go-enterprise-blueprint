@@ -3,13 +3,21 @@ package ucdef
 
 import "context"
 
+// Use case types.
+const (
+	TypeUserAction      = "user_action"
+	TypeEventSubscriber = "event_subscriber"
+	TypeScheduledJob    = "scheduled_job"
+	TypeManualCommand   = "manual_command"
+)
+
 // UserAction represents a synchronous business operation triggered by user interaction.
 // It handles user-initiated requests through HTTP, gRPC, or WebSocket protocols and
 // returns an immediate response. These operations are typically exposed via API endpoints
 // and require request validation, authorization, and synchronous error handling.
 //
 // Type parameters:
-//   - I: Input data type (request payload,)
+//   - I: Input data type (request payload)
 //   - O: Output data type (response, result of the operation)
 //
 // Examples: CreateOrder, UpdateUserProfile, PlaceInvestment, SubmitTenderBid
@@ -19,8 +27,12 @@ import "context"
 //   - User is waiting for the result
 //   - Requires comprehensive input validation
 //   - Should be audited for write operations (commands)
-//   - Errors are returned directly to the user as HTTP status codes
+//   - Errors are returned directly to the user as HTTP response
 type UserAction[I, O any] interface {
+	// OperationID returns a unique identifier for the use case.
+	OperationID() string
+
+	// Execute executes the use case.
 	Execute(ctx context.Context, in I) (O, error)
 }
 
@@ -43,6 +55,10 @@ type UserAction[I, O any] interface {
 //   - Should be audited to track state changes
 //   - Enables loose coupling between system components
 type EventSubscriber[E any] interface {
+	// OperationID returns a unique identifier for the use case.
+	OperationID() string
+
+	// Handle handles the event.
 	Handle(ctx context.Context, e E) error
 }
 
@@ -60,6 +76,10 @@ type EventSubscriber[E any] interface {
 //   - Failures logged and monitored, may trigger alerts
 //   - Consider distributed locking for multi-instance deployments
 type ScheduledJob interface {
+	// OperationID returns a unique identifier for the use case.
+	OperationID() string
+
+	// Execute executes the scheduled job.
 	Execute(ctx context.Context) error
 }
 
@@ -81,5 +101,9 @@ type ScheduledJob interface {
 //   - May have elevated privileges or bypass certain validations
 //   - Temporary scripts should be removed after use
 type ManualCommand[I any] interface {
+	// OperationID returns a unique identifier for the use case.
+	OperationID() string
+
+	// Execute executes the manual command.
 	Execute(ctx context.Context, in I) error
 }

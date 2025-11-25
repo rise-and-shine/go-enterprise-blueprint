@@ -5,7 +5,6 @@ go 1.25.3
 require (
 	github.com/code19m/errx v0.2.7
 	github.com/danielgtaylor/huma/v2 v2.34.1
-	github.com/gofiber/fiber/v2 v2.52.7
 	github.com/rise-and-shine/pkg v1.5.3
 	github.com/spf13/cobra v1.10.1
 )
@@ -14,13 +13,13 @@ require (
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/code19m/sentinel v0.0.12 // indirect
 	github.com/creasty/defaults v1.8.0 // indirect
-	github.com/fxamacker/cbor/v2 v2.8.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.26.0 // indirect
+	github.com/gofiber/fiber/v2 v2.52.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
@@ -34,7 +33,6 @@ require (
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.62.0 // indirect
-	github.com/x448/float16 v0.8.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0 // indirect
 	go.opentelemetry.io/otel v1.36.0 // indirect

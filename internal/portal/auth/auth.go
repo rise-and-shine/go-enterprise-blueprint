@@ -1,5 +1,5 @@
 package auth
 
-type Portal interface{
+type Portal interface {
 	GetUserID()
 }
