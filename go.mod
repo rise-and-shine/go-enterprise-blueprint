@@ -4,7 +4,7 @@ go 1.25.3
 
 require (
 	github.com/code19m/errx v0.2.7
-	github.com/danielgtaylor/huma/v2 v2.34.1
+	github.com/gofiber/fiber/v2 v2.52.7
 	github.com/rise-and-shine/pkg v1.5.3
 	github.com/spf13/cobra v1.10.1
 )
@@ -19,7 +19,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.26.0 // indirect
-	github.com/gofiber/fiber/v2 v2.52.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
