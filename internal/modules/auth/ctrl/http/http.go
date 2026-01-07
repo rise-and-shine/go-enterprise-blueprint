@@ -3,14 +3,14 @@ package http
 import (
 	"go-enterprise-blueprint/internal/modules/auth/domain"
 	"go-enterprise-blueprint/internal/modules/auth/service"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/user/uc1001createuser"
+	"go-enterprise-blueprint/internal/modules/auth/usecase/user/create_user"
 	"go-enterprise-blueprint/internal/portal"
-	"go-enterprise-blueprint/pkg/coreserver"
-	"go-enterprise-blueprint/pkg/http/server/forward"
+	"go-enterprise-blueprint/pkg/baseserver"
 
-	"github.com/rise-and-shine/pkg/alert"
 	"github.com/rise-and-shine/pkg/http/server"
-	"github.com/rise-and-shine/pkg/logger"
+	"github.com/rise-and-shine/pkg/http/server/forward"
+	"github.com/rise-and-shine/pkg/observability/alert"
+	"github.com/rise-and-shine/pkg/observability/logger"
 )
 
 type Server struct {
@@ -24,7 +24,7 @@ func New(
 	alertPr alert.Provider,
 ) *Server {
 	s := &Server{
-		coreserver.New(
+		baseserver.New(
 			cfg,
 			serviceName,
 			serviceVersion,
@@ -47,5 +47,5 @@ func (s *Server) Stop() error {
 func (s *Server) initRoutes() {
 	app := s.core.GetApp()
 
-	app.Post("/", forward.ToUseCase(uc1001createuser.New(domain.Container{}, service.Container{}, portal.Container{})))
+	app.Post("/", forward.ToUseCase(create_user.New(domain.Container{}, service.Container{}, portal.Container{})))
 }

@@ -9,7 +9,7 @@ import (
 
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/cfgloader"
-	"github.com/rise-and-shine/pkg/logger"
+	"github.com/rise-and-shine/pkg/observability/logger"
 )
 
 type App struct{}
@@ -42,7 +42,7 @@ func Build() *App {
 			"field2": "value2",
 		},
 		Details: "This is a detailed message for the info log entry.",
-	}).Info("test info log entry", "entry")
+	}).Info("test info log entry")
 
 	logger.Warn("i'm just warning you, there is something not ok")
 

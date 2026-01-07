@@ -1,0 +1,58 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(.*)",
+      "Write(.*)",
+      "Edit(.*)",
+      "Glob(.*)",
+      "Grep(.*)",
+      "Bash(git:*)",
+      "Bash(go:*)",
+      "Bash(make:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(curl:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(npm:*)",
+      "Bash(yarn:*)",
+      "Bash(psql:*)",
+      "Bash(mysql:*)",
+      "Bash(redis-cli:*)",
+      "Bash(echo:*)",
+      "Bash(pwd:*)",
+      "Bash(which:*)",
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(jq:*)",
+      "Bash(diff:*)",
+      "Bash(test:*)",
+      "Skill(system-analyst)",
+      "Skill(golang-developer)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Read(**/.env)",
+      "Write(**/.env)"
+    ],
+    "defaultMode": "default"
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true
+  }
+}

@@ -1,4 +1,4 @@
-package uc1001createuser
+package create_user
 
 import (
 	"context"
@@ -6,7 +6,8 @@ import (
 	"go-enterprise-blueprint/internal/modules/auth/domain/user"
 	"go-enterprise-blueprint/internal/modules/auth/service"
 	"go-enterprise-blueprint/internal/portal"
-	"go-enterprise-blueprint/pkg/ucdef"
+
+	"github.com/rise-and-shine/pkg/ucdef"
 )
 
 type CreateUserIn struct {

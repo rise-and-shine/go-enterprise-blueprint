@@ -1,11 +1,11 @@
-// Package coreserver provides a constructor function to create a core HTTP server with standard middlewares.
-package coreserver
+// Package baseserver provides a constructor function to create a base HTTP server with standard middlewares.
+package baseserver
 
 import (
-	"github.com/rise-and-shine/pkg/alert"
 	"github.com/rise-and-shine/pkg/http/server"
 	"github.com/rise-and-shine/pkg/http/server/middleware"
-	"github.com/rise-and-shine/pkg/logger"
+	"github.com/rise-and-shine/pkg/observability/alert"
+	"github.com/rise-and-shine/pkg/observability/logger"
 )
 
 func New(
@@ -15,12 +15,12 @@ func New(
 	alertPr alert.Provider,
 ) *server.HTTPServer {
 	middlewares := []server.Middleware{
-		middleware.NewRecoveryMW(logger),
+		middleware.NewRecoveryMW(cfg.Debug),
 		middleware.NewTracingMW(),
 		middleware.NewTimeoutMW(cfg.HandleTimeout),
-		middleware.NewMetaInjectMW(serviceName, serviceVersion),
-		middleware.NewAlertingMW(logger, alertPr),
-		middleware.NewLoggerMW(logger),
+		middleware.NewMetaInjectMW(),
+		middleware.NewAlertingMW(),
+		middleware.NewLoggerMW(cfg.Debug),
 		middleware.NewErrorHandlerMW(cfg.Debug),
 	}
 

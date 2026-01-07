@@ -1,8 +1,4 @@
-#-----------------------------------------#
-###            Preparation              ###
-#-----------------------------------------#
-
-# Include .env as environment variables if file exists
+# Load environment variables from .env if it exists
 ifneq (,$(wildcard ./.env))
     include .env
     export
@@ -11,26 +7,22 @@ endif
 # Define PostgreSQL DSN
 POSTGRES_DSN := postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=$(POSTGRES_SSL)
 
-#-----------------------------------------#
-###           End Preparation           ###
-#-----------------------------------------#
-
 
 #-----------------------------------------#
 ###         Linting, formatting 		###
 #-----------------------------------------#
 
-.PHONY: lint_install
-lint_install:
+.PHONY: lint-install
+lint-install:
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.5
 
 .PHONY: lint
 lint:
 	golangci-lint run --max-issues-per-linter=0 --max-same-issues=0 ./...
 
-#-----------------------------------------#
-### 	  End Linting, formatting 		###
-#-----------------------------------------#
+.PHONY: fmt
+fmt:
+	golangci-lint fmt ./...
 
 
 #-----------------------------------------#
@@ -50,21 +42,6 @@ migrate-up:
 migrate-down:
 	goose -dir "./migrations" -table "_migrations" postgres "$(POSTGRES_DSN)" down
 
-#-----------------------------------------#
-###       End Database Migrations       ###
-#-----------------------------------------#
-
-
-#-----------------------------------------#
-###             Build, Run              ###
-#-----------------------------------------#
-
-### TODO: write build targets
-
-#-----------------------------------------#
-###          End Build, Run             ###
-#-----------------------------------------#
-
 
 #-----------------------------------------#
 ###               Test                  ###
@@ -72,6 +49,9 @@ migrate-down:
 
 ### TODO: write test targets
 
+
 #-----------------------------------------#
-###               End Test               ###
+###             Build, Run              ###
 #-----------------------------------------#
+
+### TODO: write build targets
