@@ -80,7 +80,7 @@ Determine which type fits best:
 
 ### Step 3: Document the Use Case
 
-Use the appropriate template from `templates/` directory.
+Use the appropriate template from `docs/usecases/templates/` directory.
 
 ### Step 4: Define Implementation Details
 
@@ -103,7 +103,7 @@ Ensure we're not missing any necessary write or read use cases for business flow
 Use case documentation follows this path pattern:
 
 ```
-docs/usecases/{module}/{optinal-usecase-type}/{domain}/{use-case-name}.md
+docs/usecases/{module}/{optinal-subfolders-by-usecase-type-or-actor}/{domain}/{use-case-name}.md
 ```
 
 Examples:
