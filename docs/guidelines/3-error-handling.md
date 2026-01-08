@@ -39,4 +39,4 @@ if errx.IsCodeIn(err, CodeNotFound) {
 - Error types are defined **only at use case layer**
 - All downstream errors should return `errx.T_Internal` (default)
 - Use case layer knows its caller (actor) and assigns appropriate types
-- Use `errx.WrapWithTypeOnCodes` to change type based on specific codes
+- Use `errx.WrapWithTypeOnCodes` to change type based on specific codes (e.g., when error is related to user input)

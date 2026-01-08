@@ -14,13 +14,8 @@ The project follows a **modular monolith** architecture with clean architecture 
 go-enterprise-blueprint/
 ├── cmd/                    # Application entry points
 ├── config/                 # Configuration management
-│   └── modconf/            # Module-specific configurations
+│   └── modules/            # Module-specific configurations
 ├── docs/                   # Documentation (source of truth)
-│   ├── architecture/       # Architecture documentation
-│   ├── flows/              # Business/technical flow documentation
-│   ├── usecases/           # Use case specifications
-│   ├── integrations/       # External integration documentation
-│   └── gen/dbdocs/         # Generated database documentation
 ├── internal/               # Private application code
 │   ├── app/                # Application bootstrap and lifecycle
 │   ├── modules/            # Business modules
@@ -28,7 +23,7 @@ go-enterprise-blueprint/
 ├── pkg/                    # Shared packages (project-specific)
 ├── migrations/             # Database migrations (goose)
 ├── scripts/                # Utility bash scripts
-└── tests/                  # Integration/E2E tests
+└── tests/                  # Integration and E2E tests
 ```
 
 ## Architectural Layers
@@ -37,10 +32,16 @@ go-enterprise-blueprint/
 
 The command layer uses Cobra CLI framework to define application entry points:
 
-- **run-all-in-one**: Runs all services in a single process (development/simple deployments)
-- **HTTP server commands**: Individual HTTP server runners per module
+- **Single binary** multiple commands
+- **Hybrid** development and production deployments
+- **Module-specific commands**: CLI commands for each module
 - **CLI commands**: Module-specific management commands (e.g., `create-superuser`)
-- **Cron manager**: Background task scheduler
+- **run-all-in-one:** Runs all services with single command (development/simple deployments)
+
+```bash
+# List all available commands
+go run ./cmd help
+```
 
 ### 2. Configuration (`config/`)
 
@@ -49,61 +50,87 @@ Configuration follows environment-based loading with YAML files:
 ```
 config/
 ├── config.go              # Root configuration struct
-├── modconf/               # Module-specific configs
-│   └── auth.go            # Auth module config
-├── local.yaml             # Local environment
+├── modules/               # Module-specific configs
+│   ├── auth.go            # Auth module config
+│   └── ...
+├── production.yaml        # Production environment
 ├── staging.yaml           # Staging environment
-└── production.yaml        # Production environment
+├── dev.yaml               # Development environment
+├── local.yaml.example     # Local environment example
+├── local.yaml             # Local environment (gitignored)
+└── test.yaml              # Test environment
 ```
 
 Configuration is loaded via `github.com/rise-and-shine/pkg/cfgloader` with validation support.
 
-### 3. Application Layer (`internal/app/`)
+### 3. Documentation (`docs/`)
+
+The `docs/` folder serves as the source of truth for the project:
+
+```
+docs/
+├── architecture/       # Architecture documentation (this file)
+├── flows/              # Business/technical flow documentation
+├── usecases/           # Use case specifications (API specs)
+├── guidelines/         # Development guidelines and conventions
+├── integrations/       # External integration documentation
+├── uml/                # UML diagrams referenced from markdown files
+├── misc/               # Miscellaneous files (PDFs, references)
+└── gen/dbdocs/         # Generated database documentation (tbls)
+```
+
+We follow a **document-first approach**: documentation serves as the specification, and implementation follows the documentation.
+
+### 4. Application Layer (`internal/app/`)
 
 Responsible for:
 
 - Application bootstrap and dependency wiring
 - Service lifecycle management
-- Logger initialization
-- Global error handling setup
+- Graceful shutdown
 
-### 4. Modules (`internal/modules/`)
+### 5. Modules (`internal/modules/`)
 
 Each module is a self-contained business capability with the following internal structure:
 
 ```
 internal/modules/{module}/
-├── module.go              # Module initialization
-├── domain/                # Domain layer
-│   ├── container.go       # Domain container (DI)
-│   ├── {entity}/          # Domain entities
-│   │   ├── entity.go      # Entity definition
-│   │   └── repo.go        # Repository interface
+├── module.go                  # Module initialization
+├── domain/                    # Domain layer
+│   ├── container.go           # Domain container (DI)
+│   ├── {domain}/              # Domain entities
+│   │   ├── entity.go          # Entity definition
+│   │   └── repo.go            # Repository interface
 │   └── ...
-├── service/               # Service layer
-│   └── container.go       # Service container (DI)
-├── usecase/               # Use case layer
+├── infra/                     # Infrastructure layer
+│   └── postgres/
+│       └── {domain}.go        # Implementation of domain Repo interfaces
+│   └── http/
+│       └── {client_name}.go   # Implementation of domain Client interfaces
+│   └── ...
+├── usecase/                   # Use case layer
 │   └── {domain}/
 │       └── {usecase}/
-│           └── usecase.go # Use case implementation
-├── ctrl/                  # Controller layer
-│   ├── http/              # HTTP handlers
-│   ├── cli/               # CLI commands
-│   └── consumer/          # Event consumers
-└── pblc/                  # Packaged Business Logic Components (reusable logic)
+│           └── usecase.go     # Use case implementation
+├── ctrl/                      # Controller layer
+│   ├── http/                  # HTTP handlers
+│   ├── cli/                   # CLI commands
+│   └── consumer/              # Event consumers
+├── pblc/                      # Packaged Business Logic Components (reusable logic)
+└── public/                    # Portal contract implementation (cross-module API)
 ```
 
 #### Current Modules
 
-| Module      | Description                                           |
-| ----------- | ----------------------------------------------------- |
-| `auth`      | Authentication, authorization, user management, RBAC  |
-| `esign`     | Electronic signature integration                      |
-| `filestore` | File storage management                               |
-| `doc`       | Documentation serving                                 |
-| `platform`  | Platform utilities (taskmill, sentinel, integrations) |
+| Module     | Description                                           |
+| ---------- | ----------------------------------------------------- |
+| `auth`     | Authentication, authorization, user management, RBAC  |
+| `esign`    | Electronic signature integration                      |
+| `audit`    | Usecase based and Object based audit logging          |
+| `platform` | Platform utilities (taskmill, sentinel, integrations) |
+| ...        | ...                                                   |
 
-### 5. Portal Layer (`internal/portal/`)
+### 6. Portal Layer (`internal/portal/`)
 
 The Portal pattern provides controlled cross-module communication:
 
@@ -123,6 +150,9 @@ type Container struct {
 - No direct imports between modules
 - Portals expose only necessary functionality
 - Enables module isolation and testing
+- Modules don't use other modules data directly (by joining).
+- Modules don't know that we are using a single database.
+- No transaction sharing between modules.
 
 ## Module Internal Architecture
 
@@ -150,6 +180,9 @@ type User struct {
 // Repository interface - uses repogen generics
 type UserRepo interface {
     repogen.Repo[UserFilter, User]
+
+    // Additional repository methods if needed
+    // ...
 }
 ```
 
@@ -158,6 +191,8 @@ type UserRepo interface {
 - Use `repogen` package for generic CRUD operations
 - Prefer general-purpose methods over specialized queries
 - Repository works with `bun.IDB` (supports both DB and Tx)
+- Search for client implementation from gitlab.mf.uz/go-lib/integration-sdk
+- For http client implementations use resty v2. Example: TODO...
 
 ### Use Case Layer
 
@@ -175,7 +210,7 @@ Implements business logic following the use case pattern.
 ```go
 package create_user
 
-const OperationID = "auth.create-user"
+const OperationID = "create-user"
 
 // Use case definition
 type UseCase ucdef.UserAction[*CreateUserIn, *CreateUserOut]
@@ -192,21 +227,25 @@ func (uc useCase) OperationID() string {
 }
 
 func (uc useCase) Execute(ctx context.Context, in *CreateUserIn) (*CreateUserOut, error) {
-    // 1. Validate input
-    // 2. Check authorization
-    // 3. Execute business logic
-    // 4. Return result
+    // Validate input
+    // Check preconditions
+    // Execute business logic
+    // ...
+    // ...
+    // Return result
 }
 ```
 
 #### Use Case Types (from `pkg/ucdef`)
 
-| Type              | Trigger           | Example           |
-| ----------------- | ----------------- | ----------------- |
-| `UserAction`      | HTTP/gRPC request | CreateUser, Login |
-| `EventSubscriber` | Domain event      | SendWelcomeEmail  |
-| `AsyncTask`       | Cron/scheduler    | DailyReport       |
-| `ManualCommand`   | CLI               | CreateSuperuser   |
+| Type              | Trigger                                        | Example           |
+| ----------------- | ---------------------------------------------- | ----------------- |
+| `UserAction`      | HTTP/gRPC request                              | CreateUser, Login |
+| `EventSubscriber` | Domain event                                   | SendWelcomeEmail  |
+| `AsyncTask`       | Cron/scheduler or on-demand by other use cases | DailyReport       |
+| `ManualCommand`   | CLI                                            | CreateSuperuser   |
+
+For AsyncTask management we use taskmill framework `github.com/rise-and-shine/pkg/taskmill`
 
 ### PBLC Layer (Packaged Business Logic Components)
 
@@ -225,34 +264,12 @@ Adapts external interfaces to use cases.
 
 - **One-to-one relationship** with use cases (each use case has exactly one controller)
 - Keep this layer thin and simple
-- Use generic components (e.g., `forward.ToUseCase`) instead of manual handlers
+- Use generic components (e.g., `forward.ToUseCase`) instead of manual handlers where possible
 - No business logic in controllers
-
-**HTTP Controller:**
-
-```go
-func (s *Server) initRoutes() {
-    app := s.core.GetApp()
-    // Use forward.ToUseCase for automatic request/response handling
-    app.Post("/users", forward.ToUseCase(create_user.New(dc, sc, pc)))
-}
-```
-
-**CLI Controller:**
-
-```go
-// Cobra commands for module-specific operations (manual_command use cases)
-```
-
-**Consumer Controller:**
-
-```go
-// Event consumers for async processing (event_subscriber use cases)
-```
 
 ## Dependency Injection
 
-Each layer uses container structs for dependency management:
+Each layer uses container structs (with getter methods) for dependency management:
 
 ```go
 // Domain container
@@ -296,7 +313,7 @@ middlewares := []server.Middleware{
 }
 ```
 
-Built on Fiber v2 for high performance.
+Built on Fiber v2.
 
 ## Error Handling
 
@@ -313,7 +330,7 @@ const (
 // Create errors with codes
 err := errx.New("user not found", errx.WithCode(CodeNotFound))
 
-// Wrap errors to preserve stack trace
+// Always wrap errors to preserve error trace
 if err != nil {
     return errx.Wrap(err)
 }
@@ -331,40 +348,19 @@ if errx.IsCodeIn(err, CodeNotFound) {
 - Use error codes for programmatic error handling
 - Never use `panic` in library/business code
 
-## Key External Dependencies
-
-| Package                         | Purpose                                           |
-| ------------------------------- | ------------------------------------------------- |
-| `github.com/rise-and-shine/pkg` | Shared enterprise packages (ucdef, repogen, etc.) |
-| `github.com/spf13/cobra`        | CLI framework                                     |
-| `github.com/gofiber/fiber/v2`   | HTTP framework                                    |
-| `github.com/uptrace/bun`        | SQL ORM                                           |
-| `github.com/jackc/pgx/v5`       | PostgreSQL driver                                 |
-| `github.com/code19m/errx`       | Structured error handling with codes              |
-| `go.opentelemetry.io/otel`      | Observability (tracing, metrics)                  |
-| `go-resty/resty/v2`             | HTTP client for external integrations             |
-
 ## Database
 
 - **Primary database:** PostgreSQL
 - **ORM:** Bun (lightweight, type-safe)
 - **Migrations:** Goose (SQL-based)
-- **Connection pooling:** pgx with puddle
+- **Connection pooling:** pgx v5 with pgxpool subpackage
 
 ### Migration Conventions
 
 - All migrations in single `./migrations/` folder (no subfolders)
 - **Prefix with module name**: `{module}_{description}.sql`
-- Migrations run **automatically on application startup** (including production)
+- When deploying migrations run **automatically on application startup** (including production)
 - No manual DevOps intervention required for migrations
-
-```bash
-# Naming examples
-auth_init_schema.sql        # Good - module prefix
-auth_add_user_roles.sql     # Good - module prefix
-platform_init_taskmill.sql  # Good - module prefix
-init_schema.sql             # Bad - missing module prefix
-```
 
 Migration commands:
 
@@ -381,9 +377,8 @@ make migrate-down    # Rollback migration
 - **Style guides:** Effective Go, Go Code Review Comments, Uber Go Style Guide
 
 ```bash
-make lint    # Run linter
 make fmt     # Format code
-go test -race ./...  # Run tests with race detector
+make lint    # Run linter
 ```
 
 ## Testing
@@ -420,10 +415,7 @@ func TestCreateUser(t *testing.T) {
 - Fakes provide controlled behavior for integration tests
 - Located in `tests/` directory
 
-## Diagrams
-
-<!-- TODO: Add architecture diagrams -->
-<!-- Reference: ./diagrams/ -->
+TODO... explain our testing approach in GIVEN -> WHEN -> THEN pattern (after implementing good one).
 
 ## Related Documentation
 
