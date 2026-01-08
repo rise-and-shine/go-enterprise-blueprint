@@ -138,6 +138,10 @@ if errx.IsCodeIn(err, CodeNotFound) {
 }
 ```
 
+**Error Types**
+
+Error types are defined only at use case layer. All downstream errors should return errx.T_Internal type (which is default). Because type of error is defined by who is using it, use case layer is the only one that know about it's caller (actor). Use errx.WrapWithTypeOnCodes function to wrap error with changed type on specific codes.
+
 ### 4. Struct Design
 
 **Field Ordering**
@@ -408,7 +412,7 @@ func BenchmarkProcess(b *testing.B) {
 
 **Formatting and linting**
 
-- [ ] Use commands provided by Makefile for formatting and linting
+- [ ] Use commands provided by Makefile for formatting and linting (`make lint`, `make fmt`)
 
 **Comments**
 
@@ -525,6 +529,7 @@ This layer is used for deduplicating and packaging independent, reusable busines
 
 ### Infrastructure/Repository layer
 
+- [ ] Interfaces of repositories should be written in domain layer
 - [ ] Prefer Generalization over Specialization
 - [ ] For postgres repositories use repogen package. Try to minimize additioal methods, try to use general-purpose methods of repogen on caller layers
 - [ ] For http clients use resty v2
@@ -532,7 +537,6 @@ This layer is used for deduplicating and packaging independent, reusable busines
 Examples:
 postgres store - TODO...
 http clients - TODO...
-in-memory components - TODO...
 
 ### Transaction management
 

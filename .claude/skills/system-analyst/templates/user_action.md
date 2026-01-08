@@ -53,7 +53,7 @@ EXAMPLE FOR GET
 - Produce `{EventName}` event
 - Return {result}
 
-## Special Error Codes (THIS SECTIN IS REQUIRED ONLY FOR service_acc ACTOR TYPES)
+## Special Error Codes (THIS SECTION IS RELEVANT ONLY FOR service_acc ACTOR TYPES)
 
 - `{error code}`: {optinal description of error}
 
