@@ -416,9 +416,3 @@ func TestCreateUser(t *testing.T) {
 - Located in `tests/` directory
 
 TODO... explain our testing approach in GIVEN -> WHEN -> THEN pattern (after implementing good one).
-
-## Related Documentation
-
-- [Infrastructure Architecture](./infrastructure.md)
-- [Use Cases](../usecases/)
-- [Business Flows](../flows/)
