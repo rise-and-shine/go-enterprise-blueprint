@@ -23,14 +23,14 @@ type CreateUserOut struct {
 
 type UseCase ucdef.UserAction[*CreateUserIn, *CreateUserOut]
 
-func New(dc domain.Container, sc service.Container, pc portal.Container) UseCase {
+func New(dc *domain.Container, sc *service.Container, pc *portal.Container) UseCase {
 	return &useCase{dc, sc, pc}
 }
 
 type useCase struct {
-	dc domain.Container
-	sc service.Container
-	pc portal.Container
+	dc *domain.Container
+	sc *service.Container
+	pc *portal.Container
 }
 
 func (uc useCase) OperationID() string {

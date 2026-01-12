@@ -120,16 +120,6 @@ internal/modules/{module}/
 └── public/                    # Portal contract implementation (cross-module API)
 ```
 
-#### Current Modules
-
-| Module     | Description                                           |
-| ---------- | ----------------------------------------------------- |
-| `auth`     | Authentication, authorization, user management, RBAC  |
-| `esign`    | Electronic signature integration                      |
-| `audit`    | Usecase based and Object based audit logging          |
-| `platform` | Platform utilities (taskmill, sentinel, integrations) |
-| ...        | ...                                                   |
-
 ### 6. Portal Layer (`internal/portal/`)
 
 The Portal pattern provides controlled cross-module communication:
@@ -153,6 +143,20 @@ type Container struct {
 - Modules don't use other modules data directly (by joining).
 - Modules don't know that we are using a single database.
 - No transaction sharing between modules.
+
+### 7. Testing (`tests/`)
+
+TODO.... explain integration tests file structure
+
+#### Current Modules
+
+| Module     | Description                                           |
+| ---------- | ----------------------------------------------------- |
+| `auth`     | Authentication, authorization, user management, RBAC  |
+| `esign`    | Electronic signature integration                      |
+| `audit`    | Usecase based and Object based audit logging          |
+| `platform` | Platform utilities (taskmill, sentinel, integrations) |
+| ...        | ...                                                   |
 
 ## Module Internal Architecture
 
@@ -201,11 +205,8 @@ Implements business logic following the use case pattern.
 **Conventions:**
 
 - **Document-first approach**: Always document use case in `docs/usecases/` before implementing
-- Use case code should reference and reflect its documentation
 - One file per use case, package name uses snake_case (team exception)
 - Define `OperationID` as constant at top of file
-- Enforce input validation and business logic rules
-- Transaction management via UnitOfWork pattern at this layer
 
 ```go
 package create_user
@@ -278,13 +279,13 @@ type Container struct {
     rbacRepo    rbac.RoleRepo
 }
 
-// Service container
+// PBLC container
 type Container struct {
     hasher      hasher.Service
     mailer      mailer.Service
 }
 
-// Portal container (cross-module)
+// Portal container (cross-module communications)
 type Container struct {
     auth      auth.Portal
     esign     esign.Portal
@@ -301,118 +302,11 @@ Benefits:
 
 Base server with standard middleware stack:
 
-```go
-middlewares := []server.Middleware{
-    middleware.NewRecoveryMW(cfg.Debug),     // Panic recovery
-    middleware.NewTracingMW(),               // Distributed tracing
-    middleware.NewTimeoutMW(cfg.Timeout),    // Request timeout
-    middleware.NewMetaInjectMW(),            // Request metadata
-    middleware.NewAlertingMW(),              // Error alerting
-    middleware.NewLoggerMW(cfg.Debug),       // Request logging
-    middleware.NewErrorHandlerMW(cfg.Debug), // Error formatting
-}
-```
+- Recovery
+- Tracing
+- Timeout
+- Alerting
+- Logging
+- Error handling
 
 Built on Fiber v2.
-
-## Error Handling
-
-Uses `github.com/code19m/errx` for structured error handling with **error codes** (not sentinel errors):
-
-```go
-// Define error codes (not sentinel errors)
-const (
-    CodeNotFound     = "NOT_FOUND"
-    CodeUnauthorized = "UNAUTHORIZED"
-    CodeInvalidInput = "INVALID_INPUT"
-)
-
-// Create errors with codes
-err := errx.New("user not found", errx.WithCode(CodeNotFound))
-
-// Always wrap errors to preserve error trace
-if err != nil {
-    return errx.Wrap(err)
-}
-
-// Check error codes
-if errx.IsCodeIn(err, CodeNotFound) {
-    // handle not found
-}
-```
-
-**Conventions:**
-
-- Always handle errors, never ignore them
-- Use `errx.Wrap()` to preserve stack traces
-- Use error codes for programmatic error handling
-- Never use `panic` in library/business code
-
-## Database
-
-- **Primary database:** PostgreSQL
-- **ORM:** Bun (lightweight, type-safe)
-- **Migrations:** Goose (SQL-based)
-- **Connection pooling:** pgx v5 with pgxpool subpackage
-
-### Migration Conventions
-
-- All migrations in single `./migrations/` folder (no subfolders)
-- **Prefix with module name**: `{module}_{description}.sql`
-- When deploying migrations run **automatically on application startup** (including production)
-- No manual DevOps intervention required for migrations
-
-Migration commands:
-
-```bash
-make migrate-create  # Create new migration
-make migrate-up      # Apply migrations
-make migrate-down    # Rollback migration
-```
-
-## Code Quality
-
-- **Linting:** golangci-lint with comprehensive ruleset (`.golangci.yml`)
-- **Formatting:** golangci-lint fmt
-- **Style guides:** Effective Go, Go Code Review Comments, Uber Go Style Guide
-
-```bash
-make fmt     # Format code
-make lint    # Run linter
-```
-
-## Testing
-
-### Unit Testing
-
-- **Table-driven tests** preferred for comprehensive coverage
-- Use `mockery` v2 for generating mocks (don't write mocks by hand)
-- Mocking via interfaces
-
-```go
-func TestCreateUser(t *testing.T) {
-    tests := []struct {
-        name     string
-        input    CreateUserIn
-        wantErr  bool
-        errCode  string
-    }{
-        {"valid user", CreateUserIn{...}, false, ""},
-        {"invalid email", CreateUserIn{...}, true, CodeInvalidInput},
-    }
-
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            // test logic
-        })
-    }
-}
-```
-
-### Integration Testing
-
-- Write **fake objects** (test doubles) for external dependencies
-- Fakes provide controlled behavior for integration tests
-- Located in `tests/` directory
-
-TODO... explain our testing approach in GIVEN -> WHEN -> THEN pattern (after implementing good one).

@@ -1,6 +1,6 @@
 ---
 name: golang-developer
-description: Ensures Go code follows idiomatic patterns, best practices, community and team standards. Use when writing Go code, reviewing Go implementations, or refactoring Go projects.
+description: ALWAYS use this skill when writing Go code. Ensures Go code follows idiomatic patterns, best practices, community and team standards. Use when writing Go code, reviewing Go implementations, or refactoring Go projects.
 ---
 
 # Golang Developer Skill
@@ -13,7 +13,7 @@ description: Ensures Go code follows idiomatic patterns, best practices, communi
 
 ## Guidelines
 
-Scan [docs/guidelines/](../../../docs/guidelines/) for full team guidelines:
+Scan [docs/guidelines/](../../../docs/guidelines/guidelines.md) for full team guidelines:
 
 ---
 

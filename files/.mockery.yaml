@@ -1,0 +1,14 @@
+# .mockery.yaml - Central configuration (recommended for v2.31+)
+# Place at project root
+
+# Global settings
+with-expecter: true # Generate EXPECT() methods (type-safe)
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "mocks"
+dir: "{{.InterfaceDir}}/mocks"
+
+# Package-based configuration (new style, replaces go:generate)
+packages:
+  github.com/rise-and-shine/pkg:
+    config:
+      all: true # Generate mocks for ALL interfaces in this package

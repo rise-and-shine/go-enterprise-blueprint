@@ -1,0 +1,13 @@
+listen: 0.0.0.0:8001
+routes:
+  - path: /api/v1/platform/
+    target: http://localhost:7001
+
+  - path: /api/v1/auth/
+    target: http://localhost:7002
+
+  - path: /api/v1/esign/
+    target: http://localhost:7003
+
+  - path: /api/v1/audit/
+    target: http://localhost:7004

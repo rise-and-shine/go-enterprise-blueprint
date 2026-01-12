@@ -9,21 +9,65 @@ import (
 
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/cfgloader"
+	"github.com/rise-and-shine/pkg/meta"
+	"github.com/rise-and-shine/pkg/observability/alert"
 	"github.com/rise-and-shine/pkg/observability/logger"
+	"github.com/rise-and-shine/pkg/observability/tracing"
 )
 
-type App struct{}
+type app struct {
+	cfg config.Config
 
-type logEntry struct {
-	Title   string            `json:"title"`
-	Fields  map[string]string `json:"fields,omitempty"`
-	Details string            `json:"details,omitempty"`
+	tracerShutdownFunc func() error
+	alertShutdownFunc  func() error
+	dbCloser           func() error
 }
 
-func Build() *App {
-	cfg := cfgloader.MustLoad[config.Config]()
+func newAppWithConfig(cfg config.Config) *app {
+	return &app{
+		cfg: cfg,
+	}
+}
 
-	logger.SetGlobal(cfg.Logger)
+func (a *app) initObservability(
+	serviceName string,
+	serviceVersin string,
+) error {
+	var err error
+
+	// set global service information
+	meta.SetServiceInfo(serviceName, serviceVersin)
+
+	// init logger
+	logger.SetGlobal(a.cfg.Logger)
+
+	// init metrics
+	// Metrics provider not implemented yet...
+
+	// init tracing
+	a.tracerShutdownFunc, err = tracing.InitGlobalTracer(a.cfg.Tracing)
+	if err != nil {
+		return errx.Wrap(err)
+	}
+
+	// init alerting
+	err = alert.SetGlobal(a.cfg.Alert)
+	if err != nil {
+		return errx.Wrap(err)
+	}
+	a.alertShutdownFunc = alert.ShutdownGlobal
+
+	return nil
+}
+
+func (a *app) shutdown() {
+	// TODO...
+}
+
+func initApp() *app {
+	app := &app{}
+
+	cfg := cfgloader.MustLoad[config.Config]()
 
 	logger, err := logger.New(cfg.Logger)
 	if err != nil {

@@ -1,6 +1,6 @@
 ---
 name: system-analyst
-description: Analyzes business problems and writes structured documentation. Use when defining new features, documenting requirements, or creating use case specifications.
+description: ALWAYS use this skill when dealing with documenentation. This skill analyzes business problems and writes structured documentation.
 ---
 
 # System Analyst Skill

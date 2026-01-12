@@ -1,51 +1,40 @@
 package http
 
 import (
-	"go-enterprise-blueprint/internal/modules/auth/domain"
-	"go-enterprise-blueprint/internal/modules/auth/service"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/user/create_user"
-	"go-enterprise-blueprint/internal/portal"
+	"go-enterprise-blueprint/internal/modules/auth/usecase"
 	"go-enterprise-blueprint/pkg/baseserver"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/rise-and-shine/pkg/http/server"
-	"github.com/rise-and-shine/pkg/http/server/forward"
-	"github.com/rise-and-shine/pkg/observability/alert"
-	"github.com/rise-and-shine/pkg/observability/logger"
 )
 
-type Server struct {
-	core *server.HTTPServer
+type Controller struct {
+	httpServer *server.HTTPServer
 }
 
-func New(
+func NewContoller(
 	cfg server.Config,
-	serviceName, serviceVersion string,
-	logger logger.Logger,
-	alertPr alert.Provider,
-) *Server {
-	s := &Server{
-		baseserver.New(
-			cfg,
-			serviceName,
-			serviceVersion,
-			logger,
-			alertPr,
-		),
-	}
-	s.initRoutes()
-	return s
+	uc *usecase.Container,
+) *Controller {
+	httpServer := baseserver.New(cfg)
+
+	ctrl := &Controller{httpServer}
+
+	ctrl.httpServer.RegisterRouter(ctrl.initRoutes)
+
+	return ctrl
 }
 
-func (s *Server) Start() error {
-	return s.core.Start()
+func (c *Controller) Server() *server.HTTPServer {
+	return c.httpServer
 }
 
-func (s *Server) Stop() error {
-	return s.core.Stop()
-}
+func (c *Controller) initRoutes(r fiber.Router) {
+	v1 := r.Group("/auth/v1")
 
-func (s *Server) initRoutes() {
-	app := s.core.GetApp()
+	v1.Get("/health", func(ctx *fiber.Ctx) error {
+		return ctx.JSON(fiber.Map{"status": "OK"})
+	})
 
-	app.Post("/", forward.ToUseCase(create_user.New(domain.Container{}, service.Container{}, portal.Container{})))
+	// Add new handlers here...
 }
