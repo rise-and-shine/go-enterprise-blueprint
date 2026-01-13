@@ -1,15 +1,6 @@
 package main
 
 import (
-	"context"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"go-enterprise-blueprint/pkg/easyproxy"
-
-	"github.com/rise-and-shine/pkg/observability/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +11,7 @@ func main() {
 	root.AddCommand(runAllInOne())
 
 	// reverse proxy
-	root.AddCommand(runProxy())
+	// root.AddCommand(runProxy())
 
 	// ...add http server commands here...
 
@@ -44,38 +35,38 @@ func runAllInOne() *cobra.Command {
 	}
 }
 
-func runProxy() *cobra.Command {
-	var configPath string
+// func runProxy() *cobra.Command {
+// 	var configPath string
 
-	cmd := &cobra.Command{
-		Use:   "run-proxy",
-		Short: "Run the reverse proxy server",
-		Run: func(_ *cobra.Command, _ []string) {
-			logger.SetGlobal(logger.Config{
-				Level:    "info",
-				Encoding: "pretty",
-			})
+// 	cmd := &cobra.Command{
+// 		Use:   "run-proxy",
+// 		Short: "Run the reverse proxy server",
+// 		Run: func(_ *cobra.Command, _ []string) {
+// 			logger.SetGlobal(logger.Config{
+// 				Level:    "info",
+// 				Encoding: "pretty",
+// 			})
 
-			cfg, err := easyproxy.LoadConfig(configPath)
-			if err != nil {
-				log.Fatalf("Failed to load config: %v", err)
-			}
+// 			cfg, err := easyproxy.LoadConfig(configPath)
+// 			if err != nil {
+// 				log.Fatalf("Failed to load config: %v", err)
+// 			}
 
-			proxy, err := easyproxy.New(cfg)
-			if err != nil {
-				log.Fatalf("Failed to create proxy: %v", err)
-			}
+// 			proxy, err := easyproxy.New(cfg)
+// 			if err != nil {
+// 				log.Fatalf("Failed to create proxy: %v", err)
+// 			}
 
-			ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-			defer cancel()
+// 			ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+// 			defer cancel()
 
-			if err := proxy.Run(ctx); err != nil {
-				log.Fatalf("Proxy server error: %v", err)
-			}
-		},
-	}
+// 			if err := proxy.Run(ctx); err != nil {
+// 				log.Fatalf("Proxy server error: %v", err)
+// 			}
+// 		},
+// 	}
 
-	cmd.Flags().StringVarP(&configPath, "config", "c", "proxy.yaml", "Path to proxy config file")
+// 	cmd.Flags().StringVarP(&configPath, "config", "c", "proxy.yaml", "Path to proxy config file")
 
-	return cmd
-}
+// 	return cmd
+// }

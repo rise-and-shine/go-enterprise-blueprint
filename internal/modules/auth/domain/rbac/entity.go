@@ -9,9 +9,7 @@ import (
 type ActorType string
 
 func (at ActorType) IsValid() bool {
-	valids := []ActorType{
-		ActorTypeUser, ActorTypeAdmin, ActorTypeServiceAcc,
-	}
+	valids := []ActorType{ActorTypeUser, ActorTypeAdmin, ActorTypeServiceAcc}
 
 	return slices.Contains(valids, at)
 }

@@ -1,7 +1,15 @@
 package usecase
 
-import "go-enterprise-blueprint/internal/modules/auth/usecase/user/create_user"
+import "go-enterprise-blueprint/internal/modules/auth/usecase/user/create_superadmin"
 
 type Container struct {
-	createSuperUser create_user.UseCase
+	createSuperAdmin create_superadmin.UseCase
+}
+
+func NewContainer(
+	createSuperAdmin create_superadmin.UseCase,
+) *Container {
+	return &Container{
+		createSuperAdmin,
+	}
 }

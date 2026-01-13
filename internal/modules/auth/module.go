@@ -8,6 +8,7 @@ import (
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/http/server"
 	"github.com/uptrace/bun"
+	"golang.org/x/sync/errgroup"
 )
 
 type Config struct {
@@ -19,6 +20,8 @@ type Config struct {
 
 type Module struct {
 	cfg Config
+
+	portal auth.Portal
 
 	httpController *http.Controller
 }
@@ -42,14 +45,16 @@ func New(
 }
 
 func (m *Module) Portal() auth.Portal {
-	// TODO: return auth portal
-	return nil
+	return m.portal
 }
 
 func (m *Module) Start() error {
-	return errx.Wrap(
-		m.httpController.Server().Start(),
-	)
+	var g errgroup.Group
+
+	g.Go(m.httpController.Server().Start)
+
+	err := g.Wait()
+	return errx.Wrap(err)
 }
 
 func (m *Module) Shutdown() error {

@@ -1,13 +1,11 @@
 package app
 
 import (
-	"go-enterprise-blueprint/config"
-
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/pg"
 )
 
-func RunAuth(cfg config.Config) error {
+func RunAuth(cfg Config) error {
 	app := newAppWithConfig(cfg)
 	defer app.shutdown()
 
