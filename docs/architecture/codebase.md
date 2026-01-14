@@ -35,7 +35,7 @@ The command layer uses Cobra CLI framework to define application entry points:
 - **Single binary** multiple commands
 - **Hybrid** development and production deployments
 - **Module-specific commands**: CLI commands for each module
-- **CLI commands**: Module-specific management commands (e.g., `create-superuser`)
+- **CLI commands**: Module-specific management commands (e.g., `create-superadmin`)
 - **run-all-in-one:** Runs all services with single command (development/simple deployments)
 
 ```bash
@@ -244,7 +244,7 @@ func (uc useCase) Execute(ctx context.Context, in *CreateUserIn) (*CreateUserOut
 | `UserAction`      | HTTP/gRPC request                              | CreateUser, Login |
 | `EventSubscriber` | Domain event                                   | SendWelcomeEmail  |
 | `AsyncTask`       | Cron/scheduler or on-demand by other use cases | DailyReport       |
-| `ManualCommand`   | CLI                                            | CreateSuperuser   |
+| `ManualCommand`   | CLI                                            | CreateSuperAdmin  |
 
 For AsyncTask management we use taskmill framework `github.com/rise-and-shine/pkg/taskmill`
 

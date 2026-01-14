@@ -2,6 +2,7 @@ package http
 
 import (
 	"go-enterprise-blueprint/internal/modules/auth/usecase"
+	"go-enterprise-blueprint/internal/portal"
 	"go-enterprise-blueprint/pkg/baseserver"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,19 +10,23 @@ import (
 )
 
 type Controller struct {
-	httpServer *server.HTTPServer
+	usecaseContainer *usecase.Container
+	portalContainer  *portal.Container
+	httpServer       *server.HTTPServer
 }
 
 func NewContoller(
-	cfg server.Config,
-	uc *usecase.Container,
+	serverConfig server.Config,
+	usecaseContainer *usecase.Container,
+	portalContainer *portal.Container,
 ) *Controller {
-	httpServer := baseserver.New(cfg)
-
-	ctrl := &Controller{httpServer}
+	ctrl := &Controller{
+		usecaseContainer,
+		portalContainer,
+		baseserver.New(serverConfig),
+	}
 
 	ctrl.httpServer.RegisterRouter(ctrl.initRoutes)
-
 	return ctrl
 }
 
@@ -36,5 +41,5 @@ func (c *Controller) initRoutes(r fiber.Router) {
 		return ctx.JSON(fiber.Map{"status": "OK"})
 	})
 
-	// Add new handlers here...
+	// Add your routes here...
 }

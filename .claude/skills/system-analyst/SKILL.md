@@ -29,7 +29,7 @@ This project defines four types of use cases (from `pkg/ucdef`):
 | `user_action`      | User interaction (HTTP, gRPC, WebSocket) | CreateOrder, UpdateProfile, Login      |
 | `event_subscriber` | Domain events (Pubsub)                   | SendEmailOnRegistered, UpdateInventory |
 | `async_task`       | Time/Cron schedule, Background tasks     | DailyReport, CleanupSessions, Backup   |
-| `manual_command`   | CLI by operator                          | CreateSuperUser, MigrateData, Reindex  |
+| `manual_command`   | CLI by operator                          | CreateSuperAdmin, MigrateData, Reindex |
 
 ## Analysis Process
 
@@ -80,7 +80,7 @@ Determine which type fits best:
 
 ### Step 3: Document the Use Case
 
-Use the appropriate template from `docs/usecases/templates/` directory.
+USE the appropriate template from `docs/templates/usecases/` directory.
 
 ### Step 4: Define Implementation Details
 
@@ -108,7 +108,7 @@ docs/usecases/{module}/{optinal-subfolders-by-usecase-type-or-actor}/{domain}/{u
 
 Examples:
 
-- `docs/usecases/auth/user/create-superuser.md`
+- `docs/usecases/auth/user/create-superadmin.md`
 - `docs/usecases/auth/role/create-role.md`
 - `docs/usecases/platform/docs/get-docs.md`
 
@@ -116,7 +116,7 @@ Examples:
 
 ### Naming Conventions
 
-- Use lowercase with hyphens: `create-superuser`, `send-daily-report`
+- Use lowercase with hyphens: `create-superadmin`, `send-daily-report`
 - Use verb-noun format: `create-user`, `update-role`, `send-notification`
 - Be specific: `create-admin-user` not just `create-user`
 

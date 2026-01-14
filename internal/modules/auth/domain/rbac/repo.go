@@ -2,26 +2,54 @@ package rbac
 
 import "github.com/rise-and-shine/pkg/repogen"
 
-type RoleFilter struct{}
+type RoleFilter struct {
+	ID   *int64
+	Name *string
+	IDs  []int64
 
-type RolePermissionFilter struct{}
+	Limit  int
+	Offset int
+}
 
-type ActorRoleFilter struct{}
+type RolePermissionFilter struct {
+	ID     *int64
+	RoleID *int64
 
-type ActorPermissionFilter struct{}
+	Limit  int
+	Offset int
+}
+
+type ActorRoleFilter struct {
+	ID        *int64
+	ActorType *ActorType
+	ActorID   *string
+	RoleID    *int64
+
+	Limit  int
+	Offset int
+}
+
+type ActorPermissionFilter struct {
+	ID        *int64
+	ActorType *ActorType
+	ActorID   *string
+
+	Limit  int
+	Offset int
+}
 
 type RoleRepo interface {
-	repogen.Repo[RoleFilter, Role]
+	repogen.Repo[Role, RoleFilter]
 }
 
 type RolePermissionRepo interface {
-	repogen.Repo[RolePermissionFilter, RolePermission]
+	repogen.Repo[RolePermission, RolePermissionFilter]
 }
 
 type ActorRoleRepo interface {
-	repogen.Repo[ActorRoleFilter, ActorRole]
+	repogen.Repo[ActorRole, ActorRoleFilter]
 }
 
 type ActorPermissionRepo interface {
-	repogen.Repo[ActorPermissionFilter, ActorPermission]
+	repogen.Repo[ActorPermission, ActorPermissionFilter]
 }

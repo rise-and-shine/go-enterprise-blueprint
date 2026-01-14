@@ -2,8 +2,17 @@ package session
 
 import "github.com/rise-and-shine/pkg/repogen"
 
-type SessionFilter struct{}
+type SessionFilter struct {
+	ID           *int64
+	ActorType    *string
+	ActorID      *string
+	AccessToken  *string
+	RefreshToken *string
 
-type SessionRepo struct {
+	Limit  int
+	Offset int
+}
+
+type SessionRepo interface {
 	repogen.Repo[Session, SessionFilter]
 }

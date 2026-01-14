@@ -57,7 +57,7 @@ Separate processes per concern:
 ./app run-auth-tasmilll-scheduler
 
 # CLI commands (one-off)
-./app auth create-superuser
+./app auth create-superadmin
 ```
 
 ### Container Deployment

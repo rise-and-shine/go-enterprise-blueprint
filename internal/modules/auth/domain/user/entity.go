@@ -13,9 +13,9 @@ type Admin struct {
 	Username     string `json:"username"`
 	PasswordHash string `json:"-"`
 
-	IsSuperadmin bool      `json:"is_superadmin"`
-	IsActive     bool      `json:"is_active"`
-	LastActiveAt time.Time `json:"last_active_at"`
+	IsSuperadmin bool       `json:"is_superadmin"`
+	IsActive     bool       `json:"is_active"`
+	LastActiveAt *time.Time `json:"last_active_at"`
 }
 
 type ServiceAccount struct {

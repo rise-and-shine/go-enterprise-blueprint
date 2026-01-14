@@ -70,7 +70,7 @@ Each use case has a type: `user_action`, `event_subscriber`, `async_task`, `manu
 
 - **Document first** — don't code before documenting
 - Reference documentation in comments
-- Define `OperationID` constant at top of file (e.g., `create-superuser`)
+- Define `OperationID` constant at top of file (e.g., `create-superadmin`)
 - Validate input (if not validated in controller)
 - One file per use case
 - If logic duplicates across use cases, move to PBLC layer
