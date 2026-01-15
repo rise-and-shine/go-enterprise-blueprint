@@ -8,17 +8,17 @@ import (
 )
 
 type Controller struct {
-	ucContainer *usecase.Container
+	usecaseContainer *usecase.Container
 }
 
-func NewController(ucContainer *usecase.Container) *Controller {
+func NewController(usecaseContainer *usecase.Container) *Controller {
 	return &Controller{
-		ucContainer,
+		usecaseContainer,
 	}
 }
 
 func (c *Controller) Commands() []*cobra.Command {
 	return []*cobra.Command{
-		c.createSuperuserCmd(),
+		c.createSuperadminCmd(),
 	}
 }

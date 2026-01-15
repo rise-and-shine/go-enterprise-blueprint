@@ -10,7 +10,6 @@ Creates the initial superadmin account for system bootstrap. This command should
 
 ## Execute
 
-- Ask username and password interactively
-- Validate in a loop until input is valid
 - Hash the password using bcrypt
-- Create admin record with `is_superuser=true`
+
+- Create admin record with `is_superadmin=true`

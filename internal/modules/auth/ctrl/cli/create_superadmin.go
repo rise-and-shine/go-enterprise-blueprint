@@ -17,7 +17,7 @@ import (
 	"golang.org/x/term"
 )
 
-func (c *Controller) createSuperuserCmd() *cobra.Command {
+func (c *Controller) createSuperadminCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create-superadmin",
 		Short: "Create the initial superadmin account",
@@ -45,7 +45,7 @@ func (c *Controller) createSuperuserCmd() *cobra.Command {
 			// Set trace ID to context
 			ctx = context.WithValue(ctx, meta.TraceID, tracing.GetStartingTraceID(ctx))
 
-			err = c.ucContainer.CreateSuperuser().Execute(ctx, create_superadmin.Input{
+			err = c.usecaseContainer.CreateSuperadmin().Execute(ctx, create_superadmin.Input{
 				Username: username,
 				Password: password,
 			})

@@ -1,0 +1,89 @@
+package asynctask
+
+import (
+	"context"
+	"go-enterprise-blueprint/internal/modules/auth/usecase"
+	"time"
+
+	"github.com/code19m/errx"
+	"github.com/rise-and-shine/pkg/taskmill/scheduler"
+	"github.com/rise-and-shine/pkg/taskmill/worker"
+	"github.com/uptrace/bun"
+	"golang.org/x/sync/errgroup"
+)
+
+type Controller struct {
+	worker           worker.Worker
+	scheduler        scheduler.Scheduler
+	usecaseContainer *usecase.Container
+}
+
+func NewController(
+	dbConn *bun.DB,
+	queueName string,
+	usecaseContainer *usecase.Container,
+) (*Controller, error) {
+	worker, err := worker.New(dbConn, queueName)
+	if err != nil {
+		return nil, errx.Wrap(err)
+	}
+
+	scheduler, err := scheduler.New(dbConn, queueName)
+	if err != nil {
+		return nil, errx.Wrap(err)
+	}
+
+	ctrl := &Controller{
+		worker,
+		scheduler,
+		usecaseContainer,
+	}
+
+	ctrl.registerTasks()
+
+	err = ctrl.registerSchedules()
+	if err != nil {
+		return nil, errx.Wrap(err)
+	}
+
+	return ctrl, nil
+}
+
+// Start starts taskmill worker and scheduler in separate goroutines and
+// blocks until all of them are done or one of them fails.
+func (c *Controller) Start() error {
+	var g errgroup.Group
+
+	ctx := context.Background()
+
+	g.Go(func() error { return c.worker.Start(ctx) })
+	g.Go(func() error { return c.scheduler.Start(ctx) })
+
+	err := g.Wait()
+	return errx.Wrap(err)
+}
+
+func (c *Controller) registerTasks() {
+	// Register async tasks here...
+	// c.worker.RegisterAsyncTask(c.usecaseContainer.SomeAsyncTask())
+}
+
+func (c *Controller) registerSchedules() error {
+	const (
+		registerTimeout = 30 * time.Second
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), registerTimeout)
+	defer cancel()
+
+	err := c.scheduler.RegisterSchedules(
+		ctx,
+		// Register cron schedules here...
+		// scheduler.Schedule{
+		// 	CronPattern: "* * * * *", // every minute
+		// 	OperationID: c.usecaseContainer.SomeAsyncTask().OperationID(),
+		// },
+	)
+
+	return errx.Wrap(err)
+}

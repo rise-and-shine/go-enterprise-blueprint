@@ -1,0 +1,12 @@
+kafka_broker: ${KAFKA_}
+auth:
+  consumers:
+    some_topic:
+      topic: some-topic
+    user_topic:
+      topic: user-topic
+
+audit:
+  consumer:
+    audit_logs_topic:
+      topic: audit-logs-topic

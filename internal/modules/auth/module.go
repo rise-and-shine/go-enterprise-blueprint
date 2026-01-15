@@ -1,39 +1,21 @@
 package auth
 
 import (
+	"go-enterprise-blueprint/internal/modules/auth/ctrl/asynctask"
 	"go-enterprise-blueprint/internal/modules/auth/ctrl/cli"
+	"go-enterprise-blueprint/internal/modules/auth/ctrl/consumer"
 	"go-enterprise-blueprint/internal/modules/auth/ctrl/http"
 	"go-enterprise-blueprint/internal/modules/auth/domain"
 	"go-enterprise-blueprint/internal/modules/auth/infra/postgres"
-	"go-enterprise-blueprint/internal/modules/auth/service"
-	"go-enterprise-blueprint/internal/modules/auth/service/hasher"
-	"go-enterprise-blueprint/internal/modules/auth/service/jwt"
+	authportal "go-enterprise-blueprint/internal/modules/auth/portal"
 	"go-enterprise-blueprint/internal/modules/auth/usecase"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/admin_login"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/admin_logout"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/admin_refresh_token"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/create_admin"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/disable_admin"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/get_admins"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/update_admin"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/rbac/get_actor_permissions"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/rbac/get_actor_roles"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/rbac/get_role_permissions"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/rbac/set_actor_permission"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/rbac/set_actor_role"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/rbac/set_role_permission"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/role/create_role"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/role/delete_role"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/role/get_roles"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/role/update_role"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/session/delete_user_all_sessions"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/session/delete_user_session"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/user/create_superadmin"
+	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/create_superadmin"
 	"go-enterprise-blueprint/internal/portal"
 	"go-enterprise-blueprint/internal/portal/auth"
 
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/http/server"
+	"github.com/rise-and-shine/pkg/kafka"
 	"github.com/spf13/cobra"
 	"github.com/uptrace/bun"
 	"golang.org/x/sync/errgroup"
@@ -43,77 +25,61 @@ type Config struct {
 	Name    string `yaml:"name"    validate:"required"`
 	Version string `yaml:"version" validate:"required"`
 
-	HttpServer server.Config `yaml:"http_server" validate:"required"`
+	HttpServer server.Config   `yaml:"http_server" validate:"required"`
+	Consumers  consumer.Config `yaml:"consumers"   validate:"required"`
 }
 
 type Module struct {
-	cfg Config
+	asynctaskCTRL *asynctask.Controller
+	consumerCTRL  *consumer.Controller
+	cliCTRL       *cli.Controller
+	httpCTRL      *http.Controller
 
 	portal auth.Portal
-
-	httpController *http.Controller
-	cliController  *cli.Controller
 }
 
 func New(
 	cfg Config,
-	dbConn bun.IDB,
+	brokerConfig kafka.BrokerConfig,
+	dbConn *bun.DB,
 	portalContainer *portal.Container,
-) *Module {
-	m := &Module{cfg: cfg}
+) (*Module, error) {
+	var (
+		err error
+		m   = &Module{}
+	)
 
 	// Init repositories
-	adminRepo := postgres.NewAdminRepo(dbConn)
-	sessionRepo := postgres.NewSessionRepo(dbConn)
-	roleRepo := postgres.NewRoleRepo(dbConn)
-	rolePermissionRepo := postgres.NewRolePermissionRepo(dbConn)
-	actorRoleRepo := postgres.NewActorRoleRepo(dbConn)
-	actorPermissionRepo := postgres.NewActorPermissionRepo(dbConn)
-
-	dc := domain.NewContainer(
-		adminRepo,
-		sessionRepo,
-		roleRepo,
-		rolePermissionRepo,
-		actorRoleRepo,
-		actorPermissionRepo,
+	domainContainer := domain.NewContainer(
+		postgres.NewAdminRepo(dbConn),
+		postgres.NewSessionRepo(dbConn),
+		postgres.NewRoleRepo(dbConn),
+		postgres.NewRolePermissionRepo(dbConn),
+		postgres.NewActorRoleRepo(dbConn),
+		postgres.NewActorPermissionRepo(dbConn),
 	)
-
-	// Init services
-	hasherSvc := hasher.New(0)
-	jwtSvc := jwt.New(cfg.JWT)
-
-	sc := service.NewContainer(hasherSvc, jwtSvc)
 
 	// Init use cases
-	uc := usecase.NewContainer(
-		create_superadmin.New(dc, sc),
-		admin_login.New(dc, sc),
-		admin_refresh_token.New(dc, sc),
-		admin_logout.New(dc),
-		delete_user_session.New(dc),
-		delete_user_all_sessions.New(dc),
-		create_role.New(dc),
-		update_role.New(dc),
-		delete_role.New(dc),
-		get_roles.New(dc),
-		set_role_permission.New(dc),
-		get_role_permissions.New(dc),
-		set_actor_role.New(dc),
-		get_actor_roles.New(dc),
-		set_actor_permission.New(dc),
-		get_actor_permissions.New(dc),
-		create_admin.New(dc, sc),
-		update_admin.New(dc, sc),
-		disable_admin.New(dc),
-		get_admins.New(dc),
+	usecaseContainer := usecase.NewContainer(
+		create_superadmin.New(domainContainer),
 	)
 
-	// Init controllers
-	m.httpController = http.NewContoller(cfg.HttpServer, uc, jwtSvc)
-	m.cliController = cli.NewController(uc)
+	// Init portal
+	m.portal = authportal.New()
 
-	return m
+	// Init controllers
+	m.cliCTRL = cli.NewController(usecaseContainer)
+	m.httpCTRL = http.NewContoller(cfg.HttpServer, usecaseContainer, portalContainer)
+	m.asynctaskCTRL, err = asynctask.NewController(dbConn, cfg.Name, usecaseContainer)
+	if err != nil {
+		return nil, errx.Wrap(err)
+	}
+	m.consumerCTRL, err = consumer.NewController(cfg.Consumers, brokerConfig, usecaseContainer)
+	if err != nil {
+		return nil, errx.Wrap(err)
+	}
+
+	return m, nil
 }
 
 func (m *Module) Portal() auth.Portal {
@@ -121,13 +87,15 @@ func (m *Module) Portal() auth.Portal {
 }
 
 func (m *Module) CLICommands() []*cobra.Command {
-	return m.cliController.Commands()
+	return m.cliCTRL.Commands()
 }
 
 func (m *Module) Start() error {
 	var g errgroup.Group
 
-	g.Go(m.httpController.Server().Start)
+	g.Go(m.asynctaskCTRL.Start)
+	g.Go(m.consumerCTRL.Start)
+	g.Go(m.httpCTRL.Server().Start)
 
 	err := g.Wait()
 	return errx.Wrap(err)
@@ -135,6 +103,6 @@ func (m *Module) Start() error {
 
 func (m *Module) Shutdown() error {
 	return errx.Wrap(
-		m.httpController.Server().Stop(),
+		m.httpCTRL.Server().Stop(),
 	)
 }

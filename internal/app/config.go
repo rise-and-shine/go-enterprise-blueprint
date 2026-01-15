@@ -3,6 +3,7 @@ package app
 import (
 	"go-enterprise-blueprint/internal/modules/auth"
 
+	"github.com/rise-and-shine/pkg/kafka"
 	"github.com/rise-and-shine/pkg/observability/alert"
 	"github.com/rise-and-shine/pkg/observability/logger"
 	"github.com/rise-and-shine/pkg/observability/tracing"
@@ -19,6 +20,8 @@ type Config struct {
 	Alert alert.Config `yaml:"alert" validate:"required"`
 
 	Postgres pg.Config `yaml:"postgres" validate:"required"`
+
+	KafkaBroker kafka.BrokerConfig `yaml:"kafka_broker" validate:"required"`
 
 	// --- Module specific configs ---
 
