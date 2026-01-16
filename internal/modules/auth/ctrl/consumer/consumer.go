@@ -53,6 +53,18 @@ func (c *Controller) Start() error {
 	return errx.Wrap(err)
 }
 
+// Shutdown parallelly stops all consumers gracefully and
+// blocks until all of them are done.
+func (c *Controller) Shutdown() error {
+	// errs := make(chan error, 1) // buffer size == consumer count
+
+	// Stop your consumers here...
+	// go func() { errs <- c.someConsumer.Stop() }()
+
+	// return errx.Wrap(errors.Join(<-errs))
+	return nil
+}
+
 func (c *Controller) initConsumers() error {
 	// var err error
 

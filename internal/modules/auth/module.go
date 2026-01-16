@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"go-enterprise-blueprint/internal/modules/auth/ctrl/asynctask"
 	"go-enterprise-blueprint/internal/modules/auth/ctrl/cli"
 	"go-enterprise-blueprint/internal/modules/auth/ctrl/consumer"
@@ -93,16 +94,30 @@ func (m *Module) CLICommands() []*cobra.Command {
 func (m *Module) Start() error {
 	var g errgroup.Group
 
-	g.Go(m.asynctaskCTRL.Start)
-	g.Go(m.consumerCTRL.Start)
-	g.Go(m.httpCTRL.Server().Start)
+	// Uncomment if you have async tasks
+	// g.Go(m.asynctaskCTRL.Start)
+
+	// Uncomment if you have consumers
+	// g.Go(m.consumerCTRL.Start)
+
+	// Uncomment if you have HTTP server
+	// g.Go(m.httpCTRL.Start)
 
 	err := g.Wait()
 	return errx.Wrap(err)
 }
 
 func (m *Module) Shutdown() error {
-	return errx.Wrap(
-		m.httpCTRL.Server().Stop(),
-	)
+	errs := make(chan error, 3)
+
+	// Uncomment if you've run asynctaskCTRL
+	// go func() { errs <- m.asynctaskCTRL.Shutdown() }()
+
+	// Uncomment if you've run consumerCTRL
+	// go func() { errs <- m.consumerCTRL.Shutdown() }()
+
+	// Uncomment if you've run httpCTRL
+	// go func() { errs <- m.httpCTRL.Shutdown() }()
+
+	return errx.Wrap(errors.Join(<-errs, <-errs, <-errs))
 }

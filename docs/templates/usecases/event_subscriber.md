@@ -19,7 +19,7 @@
 }
 ```
 
-## Execute
+## Handle
 
 - Validate event payload
 - Check idempotency using {dedup-key}

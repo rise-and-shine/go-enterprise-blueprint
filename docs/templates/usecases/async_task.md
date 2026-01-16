@@ -16,7 +16,7 @@
 }
 ```
 
-## Execute
+## Handle
 
 - Validate task payload
 - Process {what}

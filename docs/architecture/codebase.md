@@ -117,7 +117,7 @@ internal/modules/{module}/
 │   ├── cli/                   # CLI commands
 │   └── consumer/              # Event consumers
 ├── pblc/                      # Packaged Business Logic Components (reusable logic)
-└── public/                    # Portal contract implementation (cross-module API)
+└── portal/                    # Portal contract implementation (cross-module API)
 ```
 
 ### 6. Portal Layer (`internal/portal/`)

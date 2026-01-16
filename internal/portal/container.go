@@ -12,15 +12,12 @@ type Container struct {
 	esign esign.Portal
 }
 
-// NewContainer creates a new Container.
-func NewContainer(
-	auth auth.Portal,
-	esign esign.Portal,
-) *Container {
-	return &Container{
-		auth:  auth,
-		esign: esign,
-	}
+func (c *Container) SetAuthPortal(auth auth.Portal) {
+	c.auth = auth
+}
+
+func (c *Container) SetEsignPortal(esign esign.Portal) {
+	c.esign = esign
 }
 
 func (c *Container) Auth() auth.Portal {

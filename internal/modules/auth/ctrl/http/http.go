@@ -5,6 +5,7 @@ import (
 	"go-enterprise-blueprint/internal/portal"
 	"go-enterprise-blueprint/pkg/baseserver"
 
+	"github.com/code19m/errx"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rise-and-shine/pkg/http/server"
 )
@@ -30,8 +31,12 @@ func NewContoller(
 	return ctrl
 }
 
-func (c *Controller) Server() *server.HTTPServer {
-	return c.httpServer
+func (c *Controller) Start() error {
+	return errx.Wrap(c.httpServer.Start())
+}
+
+func (c *Controller) Shutdown() error {
+	return errx.Wrap(c.httpServer.Stop())
 }
 
 func (c *Controller) initRoutes(r fiber.Router) {

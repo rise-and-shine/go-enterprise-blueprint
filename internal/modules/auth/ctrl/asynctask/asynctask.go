@@ -2,6 +2,7 @@ package asynctask
 
 import (
 	"context"
+	"errors"
 	"go-enterprise-blueprint/internal/modules/auth/usecase"
 	"time"
 
@@ -50,7 +51,7 @@ func NewController(
 }
 
 // Start starts taskmill worker and scheduler in separate goroutines and
-// blocks until all of them are done or one of them fails.
+// blocks until both of them are done or one of them fails.
 func (c *Controller) Start() error {
 	var g errgroup.Group
 
@@ -61,6 +62,17 @@ func (c *Controller) Start() error {
 
 	err := g.Wait()
 	return errx.Wrap(err)
+}
+
+// Shutdown parallelly stops taskmill worker and scheduler gracefully and
+// blocks until both of them are done.
+func (c *Controller) Shutdown() error {
+	errs := make(chan error, 2)
+
+	go func() { errs <- c.worker.Stop() }()
+	go func() { errs <- c.scheduler.Stop() }()
+
+	return errx.Wrap(errors.Join(<-errs, <-errs))
 }
 
 func (c *Controller) registerTasks() {
