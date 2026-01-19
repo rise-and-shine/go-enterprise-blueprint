@@ -13,46 +13,39 @@ import (
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/meta"
 	"github.com/rise-and-shine/pkg/observability/tracing"
-	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
 
-func (c *Controller) createSuperadminCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "create-superadmin",
-		Short: "Create the initial superadmin account",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			const (
-				executionTimeout = 30 * time.Second
-			)
+func (c *Controller) CreateSuperadminCmd() error {
+	const (
+		executionTimeout = 30 * time.Second
+	)
 
-			reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(os.Stdin)
 
-			username, err := askUsername(reader)
-			if err != nil {
-				return errx.Wrap(err)
-			}
-
-			password, err := askPassword(reader)
-			if err != nil {
-				return errx.Wrap(err)
-			}
-
-			// Set timeout
-			ctx, cancel := context.WithTimeout(context.Background(), executionTimeout)
-			defer cancel()
-
-			// Set trace ID to context
-			ctx = context.WithValue(ctx, meta.TraceID, tracing.GetStartingTraceID(ctx))
-
-			err = c.usecaseContainer.CreateSuperadmin().Execute(ctx, create_superadmin.Input{
-				Username: username,
-				Password: password,
-			})
-
-			return errx.Wrap(err)
-		},
+	username, err := askUsername(reader)
+	if err != nil {
+		return errx.Wrap(err)
 	}
+
+	password, err := askPassword()
+	if err != nil {
+		return errx.Wrap(err)
+	}
+
+	// Set timeout
+	ctx, cancel := context.WithTimeout(context.Background(), executionTimeout)
+	defer cancel()
+
+	// Set trace ID to context
+	ctx = context.WithValue(ctx, meta.TraceID, tracing.GetStartingTraceID(ctx))
+
+	err = c.usecaseContainer.CreateSuperadmin().Execute(ctx, create_superadmin.Input{
+		Username: username,
+		Password: password,
+	})
+
+	return errx.Wrap(err)
 }
 
 func askUsername(reader *bufio.Reader) (string, error) {
@@ -82,7 +75,7 @@ func askUsername(reader *bufio.Reader) (string, error) {
 	}
 }
 
-func askPassword(reader *bufio.Reader) (string, error) {
+func askPassword() (string, error) {
 	const (
 		minPasswordLen = 5
 	)

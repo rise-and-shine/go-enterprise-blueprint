@@ -17,7 +17,6 @@ import (
 	"github.com/code19m/errx"
 	"github.com/rise-and-shine/pkg/http/server"
 	"github.com/rise-and-shine/pkg/kafka"
-	"github.com/spf13/cobra"
 	"github.com/uptrace/bun"
 	"golang.org/x/sync/errgroup"
 )
@@ -26,8 +25,7 @@ type Config struct {
 	Name    string `yaml:"name"    validate:"required"`
 	Version string `yaml:"version" validate:"required"`
 
-	HttpServer server.Config   `yaml:"http_server" validate:"required"`
-	Consumers  consumer.Config `yaml:"consumers"   validate:"required"`
+	Consumers consumer.Config `yaml:"consumers" validate:"required"`
 }
 
 type Module struct {
@@ -44,6 +42,7 @@ func New(
 	brokerConfig kafka.BrokerConfig,
 	dbConn *bun.DB,
 	portalContainer *portal.Container,
+	httpServer *server.HTTPServer,
 ) (*Module, error) {
 	var (
 		err error
@@ -70,7 +69,7 @@ func New(
 
 	// Init controllers
 	m.cliCTRL = cli.NewController(usecaseContainer)
-	m.httpCTRL = http.NewContoller(cfg.HttpServer, usecaseContainer, portalContainer)
+	m.httpCTRL = http.NewContoller(usecaseContainer, portalContainer, httpServer)
 	m.asynctaskCTRL, err = asynctask.NewController(dbConn, cfg.Name, usecaseContainer)
 	if err != nil {
 		return nil, errx.Wrap(err)
@@ -87,37 +86,28 @@ func (m *Module) Portal() auth.Portal {
 	return m.portal
 }
 
-func (m *Module) CLICommands() []*cobra.Command {
-	return m.cliCTRL.Commands()
-}
-
 func (m *Module) Start() error {
 	var g errgroup.Group
 
-	// Uncomment if you have async tasks
-	// g.Go(m.asynctaskCTRL.Start)
+	g.Go(m.asynctaskCTRL.Start)
 
-	// Uncomment if you have consumers
-	// g.Go(m.consumerCTRL.Start)
+	g.Go(m.consumerCTRL.Start)
 
-	// Uncomment if you have HTTP server
-	// g.Go(m.httpCTRL.Start)
-
-	err := g.Wait()
-	return errx.Wrap(err)
+	return errx.Wrap(g.Wait())
 }
 
 func (m *Module) Shutdown() error {
-	errs := make(chan error, 3)
+	errs := make(chan error, 2)
 
-	// Uncomment if you've run asynctaskCTRL
-	// go func() { errs <- m.asynctaskCTRL.Shutdown() }()
+	go func() { errs <- m.asynctaskCTRL.Shutdown() }()
 
-	// Uncomment if you've run consumerCTRL
-	// go func() { errs <- m.consumerCTRL.Shutdown() }()
+	go func() { errs <- m.consumerCTRL.Shutdown() }()
 
-	// Uncomment if you've run httpCTRL
-	// go func() { errs <- m.httpCTRL.Shutdown() }()
+	return errx.Wrap(errors.Join(<-errs, <-errs))
+}
 
-	return errx.Wrap(errors.Join(<-errs, <-errs, <-errs))
+// --- CLI commands of auth module ---
+
+func (m *Module) CreateSuperadmin() error {
+	return errx.Wrap(m.cliCTRL.CreateSuperadminCmd())
 }
