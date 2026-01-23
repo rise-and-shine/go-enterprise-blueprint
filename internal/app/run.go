@@ -51,6 +51,7 @@ func (a *app) runHighLevelComponents() error {
 	var g errgroup.Group
 
 	g.Go(a.httpServer.Start)
+	logger.Info("HTTP server started at " + a.cfg.HttpServer.Address())
 
 	// Run your modules here...
 	g.Go(a.auth.Start)
@@ -59,7 +60,12 @@ func (a *app) runHighLevelComponents() error {
 }
 
 func (a *app) init() error {
-	err := a.initSharedComponents(a.cfg.Auth.Name, a.cfg.Auth.Version)
+	err := a.initSharedComponents()
+	if err != nil {
+		return errx.Wrap(err)
+	}
+
+	err = a.applyMigrations()
 	if err != nil {
 		return errx.Wrap(err)
 	}
@@ -68,14 +74,11 @@ func (a *app) init() error {
 	return errx.Wrap(err)
 }
 
-func (a *app) initSharedComponents(
-	serviceName string,
-	serviceVersion string,
-) error {
+func (a *app) initSharedComponents() error {
 	var err error
 
 	// set global service information
-	meta.SetServiceInfo(serviceName, serviceVersion)
+	meta.SetServiceInfo(a.cfg.Service.Name, a.cfg.Service.Version)
 
 	// init logger
 	logger.SetGlobal(a.cfg.Logger)

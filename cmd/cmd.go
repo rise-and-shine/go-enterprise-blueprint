@@ -10,9 +10,10 @@ import (
 func main() {
 	var root = &cobra.Command{}
 
-	registerModuleCommands(root)
-
 	root.AddCommand(run())
+
+	root.AddCommand(app.AuthCommands())
+	// Add new modules CLI commands here...
 
 	// ignoring error since it's already displayed by cobra.
 	_ = root.Execute()
@@ -30,10 +31,4 @@ func run() *cobra.Command {
 			}
 		},
 	}
-}
-
-// registerModuleCommands registers all modules CLI commands.
-func registerModuleCommands(root *cobra.Command) {
-	root.AddCommand(app.AuthCommands())
-	// Add new modules CLI commands here...
 }

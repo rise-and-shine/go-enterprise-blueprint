@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/code19m/errx"
+	"github.com/rise-and-shine/pkg/pg/hooks"
 	"github.com/rise-and-shine/pkg/taskmill/scheduler"
 	"github.com/rise-and-shine/pkg/taskmill/worker"
 	"github.com/uptrace/bun"
@@ -85,7 +86,7 @@ func (c *Controller) registerSchedules() error {
 		registerTimeout = 30 * time.Second
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), registerTimeout)
+	ctx, cancel := context.WithTimeout(hooks.WithSuppressedQueryLogs(context.Background()), registerTimeout)
 	defer cancel()
 
 	err := c.scheduler.RegisterSchedules(

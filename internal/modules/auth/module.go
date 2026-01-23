@@ -22,10 +22,7 @@ import (
 )
 
 type Config struct {
-	Name    string `yaml:"name"    validate:"required"`
-	Version string `yaml:"version" validate:"required"`
-
-	Consumers consumer.Config `yaml:"consumers" validate:"required"`
+	Consumers consumer.Config `yaml:"consumers"`
 }
 
 type Module struct {
@@ -35,6 +32,10 @@ type Module struct {
 	httpCTRL      *http.Controller
 
 	portal auth.Portal
+}
+
+func (m *Module) name() string {
+	return "auth"
 }
 
 func New(
@@ -70,7 +71,7 @@ func New(
 	// Init controllers
 	m.cliCTRL = cli.NewController(usecaseContainer)
 	m.httpCTRL = http.NewContoller(usecaseContainer, portalContainer, httpServer)
-	m.asynctaskCTRL, err = asynctask.NewController(dbConn, cfg.Name, usecaseContainer)
+	m.asynctaskCTRL, err = asynctask.NewController(dbConn, m.name(), usecaseContainer)
 	if err != nil {
 		return nil, errx.Wrap(err)
 	}

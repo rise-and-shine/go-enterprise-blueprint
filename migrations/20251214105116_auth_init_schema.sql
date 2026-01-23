@@ -1,10 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
--- Enable pg_uuidv7 extension for UUID v7 generation
-CREATE EXTENSION IF NOT EXISTS pg_uuidv7;
+CREATE SCHEMA IF NOT EXISTS auth;
 
 CREATE TABLE auth.admins (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v7 (),
+    id UUID PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     is_superadmin BOOLEAN NOT NULL DEFAULT FALSE,
@@ -103,7 +102,7 @@ DROP TABLE IF EXISTS auth.roles;
 
 DROP TABLE IF EXISTS auth.admins;
 
--- Drop extension
-DROP EXTENSION IF EXISTS pg_uuidv7;
+-- Drop schema
+DROP SCHEMA IF EXISTS auth;
 
 -- +goose StatementEnd

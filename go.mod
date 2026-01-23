@@ -5,7 +5,8 @@ go 1.25.3
 require (
 	github.com/code19m/errx v0.3.3
 	github.com/gofiber/fiber/v2 v2.52.10
-	github.com/rise-and-shine/pkg v1.7.8
+	github.com/pressly/goose/v3 v3.26.0
+	github.com/rise-and-shine/pkg v1.8.1
 	github.com/spf13/cobra v1.10.1
 	github.com/uptrace/bun v1.2.16
 	golang.org/x/sync v0.18.0
@@ -54,11 +55,13 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
+	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/samber/lo v1.52.0 // indirect
+	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect

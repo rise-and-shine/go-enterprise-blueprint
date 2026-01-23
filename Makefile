@@ -54,4 +54,14 @@ migrate-down:
 ###             Build, Run              ###
 #-----------------------------------------#
 
-### TODO: write build targets
+.PHONY: infra-up
+infra-up:
+	docker-compose -f dev-infra.yaml --profile full up -d --build
+
+.PHONY: infra-down
+infra-down:
+	docker-compose -f dev-infra.yaml --profile full down --remove-orphans
+
+.PHONY: run
+run:
+	go run ./cmd run

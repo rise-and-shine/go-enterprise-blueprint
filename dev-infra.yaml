@@ -30,7 +30,6 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      # KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "${KAFKA_PORT}:9092"
@@ -49,6 +48,20 @@ services:
       - "${AKHQ_PORT}:8080"
     depends_on:
       - kafka
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.35
+    profiles: [jaeger, full]
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317" # OTLP
+    expose:
+      - "16685"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      COLLECTOR_GRPC_TLS_ENABLED: "false"
+      SPAN_STORAGE_TYPE: "memory"
+    command: ["--log-level=info"]
 
 volumes:
   postgres_data:

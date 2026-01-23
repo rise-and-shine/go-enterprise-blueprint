@@ -16,6 +16,8 @@ import (
 type Config struct {
 	// --- Shared configs ---
 
+	Service ServiceConfig `yaml:"service" validate:"required"`
+
 	Logger logger.Config `yaml:"logger" validate:"required"`
 
 	Tracing tracing.Config `yaml:"tracing" validate:"required"`
@@ -30,7 +32,7 @@ type Config struct {
 
 	// --- Module specific configs ---
 
-	Auth auth.Config `yaml:"auth" validate:"required"`
+	Auth auth.Config `yaml:"auth"`
 }
 
 type app struct {
@@ -50,4 +52,12 @@ func newApp() *app {
 		cfg: cfgloader.MustLoad[Config](),
 	}
 	return app
+}
+
+type ServiceConfig struct {
+	// Name is the name of the service
+	Name string `json:"name" validate:"required"`
+
+	// Version is the version of the service
+	Version string `json:"version" validate:"required"`
 }

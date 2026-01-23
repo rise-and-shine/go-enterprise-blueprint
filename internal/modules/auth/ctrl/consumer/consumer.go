@@ -10,7 +10,7 @@ import (
 
 // Config holds the configs of consumers this controller is responsible for.
 type Config struct {
-	// SomeConsumer kafka.ConsumerConfig `yaml:"some_consumer"`
+	// SomeConsumer kafka.ConsumerConfig `yaml:"some_consumer" validate:"required"`
 }
 
 type Controller struct {
