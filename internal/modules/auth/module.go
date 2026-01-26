@@ -10,7 +10,7 @@ import (
 	"go-enterprise-blueprint/internal/modules/auth/infra/postgres"
 	authportal "go-enterprise-blueprint/internal/modules/auth/portal"
 	"go-enterprise-blueprint/internal/modules/auth/usecase"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/create_superadmin"
+	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/createsuperadmin"
 	"go-enterprise-blueprint/internal/portal"
 	"go-enterprise-blueprint/internal/portal/auth"
 
@@ -62,7 +62,7 @@ func New(
 
 	// Init use cases
 	usecaseContainer := usecase.NewContainer(
-		create_superadmin.New(domainContainer),
+		createsuperadmin.New(domainContainer),
 	)
 
 	// Init portal

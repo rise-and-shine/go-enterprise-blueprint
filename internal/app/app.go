@@ -28,7 +28,7 @@ type Config struct {
 
 	KafkaBroker kafka.BrokerConfig `yaml:"kafka_broker" validate:"required"`
 
-	HttpServer server.Config `yaml:"http_server" validate:"required"`
+	HTTPServer server.Config `yaml:"http_server" validate:"required"`
 
 	// --- Module specific configs ---
 

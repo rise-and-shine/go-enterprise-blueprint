@@ -1,21 +1,21 @@
 package usecase
 
 import (
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/create_superadmin"
+	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/createsuperadmin"
 )
 
 type Container struct {
-	createSuperadmin create_superadmin.UseCase
+	createSuperadmin createsuperadmin.UseCase
 }
 
 func NewContainer(
-	createSuperadmin create_superadmin.UseCase,
+	createSuperadmin createsuperadmin.UseCase,
 ) *Container {
 	return &Container{
 		createSuperadmin: createSuperadmin,
 	}
 }
 
-func (c *Container) CreateSuperadmin() create_superadmin.UseCase {
+func (c *Container) CreateSuperadmin() createsuperadmin.UseCase {
 	return c.createSuperadmin
 }

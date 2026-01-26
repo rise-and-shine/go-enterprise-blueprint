@@ -38,7 +38,7 @@ func Run() error {
 
 	select {
 	// error occurred at module.Start
-	case err := <-errChan:
+	case err = <-errChan:
 		return errx.Wrap(err)
 
 	// signal received, just return nil to trigger app.shutdown()
@@ -51,7 +51,7 @@ func (a *app) runHighLevelComponents() error {
 	var g errgroup.Group
 
 	g.Go(a.httpServer.Start)
-	logger.Info("HTTP server started at " + a.cfg.HttpServer.Address())
+	logger.With("address", a.cfg.HTTPServer.Address()).Info("HTTP server is running . . .")
 
 	// Run your modules here...
 	g.Go(a.auth.Start)
@@ -106,7 +106,7 @@ func (a *app) initSharedComponents() error {
 	}
 
 	// init http server
-	a.httpServer = baseserver.New(a.cfg.HttpServer)
+	a.httpServer = baseserver.New(a.cfg.HTTPServer)
 
 	return nil
 }

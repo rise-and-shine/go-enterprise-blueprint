@@ -2,7 +2,7 @@ package session
 
 import "github.com/rise-and-shine/pkg/repogen"
 
-type SessionFilter struct {
+type Filter struct {
 	ID           *int64
 	ActorType    *string
 	ActorID      *string
@@ -13,6 +13,6 @@ type SessionFilter struct {
 	Offset int
 }
 
-type SessionRepo interface {
-	repogen.Repo[Session, SessionFilter]
+type Repo interface {
+	repogen.Repo[Session, Filter]
 }

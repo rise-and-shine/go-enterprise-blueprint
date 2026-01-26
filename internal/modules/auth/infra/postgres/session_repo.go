@@ -11,8 +11,8 @@ const (
 	SessionNotFoundCode = "SESSION_NOT_FOUND"
 )
 
-func NewSessionRepo(idb bun.IDB) session.SessionRepo {
-	return repogen.NewPgRepo[session.Session, session.SessionFilter](
+func NewSessionRepo(idb bun.IDB) session.Repo {
+	return repogen.NewPgRepo[session.Session, session.Filter](
 		idb,
 		"session",
 		SessionNotFoundCode,
@@ -21,7 +21,7 @@ func NewSessionRepo(idb bun.IDB) session.SessionRepo {
 	)
 }
 
-func sessionFilterFunc(q *bun.SelectQuery, f session.SessionFilter) *bun.SelectQuery {
+func sessionFilterFunc(q *bun.SelectQuery, f session.Filter) *bun.SelectQuery {
 	if f.ID != nil {
 		q = q.Where("id = ?", *f.ID)
 	}

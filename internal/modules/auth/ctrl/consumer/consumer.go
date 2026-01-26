@@ -19,7 +19,7 @@ type Controller struct {
 	usecaseContainer *usecase.Container
 
 	// Add your consumers here...
-	someConsumer *kafka.Consumer
+	// someConsumer *kafka.Consumer
 }
 
 func NewController(
@@ -48,6 +48,10 @@ func (c *Controller) Start() error {
 
 	// Run your consumers here...
 	// g.Go(c.someConsumer.Start)
+	// logger.
+	// 	With("module", "auth").
+	// 	With("topic", c.cfg.SomeConsumer.Topic).
+	// 	Info("some consumer is running . . .")
 
 	err := g.Wait()
 	return errx.Wrap(err)

@@ -6,7 +6,7 @@ require (
 	github.com/code19m/errx v0.3.3
 	github.com/gofiber/fiber/v2 v2.52.10
 	github.com/pressly/goose/v3 v3.26.0
-	github.com/rise-and-shine/pkg v1.8.1
+	github.com/rise-and-shine/pkg v1.8.4
 	github.com/spf13/cobra v1.10.1
 	github.com/uptrace/bun v1.2.16
 	golang.org/x/sync v0.18.0

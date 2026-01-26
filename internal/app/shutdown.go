@@ -38,10 +38,10 @@ func (a *app) shutdownInfraComponents() {
 	var items []shutdownItem
 
 	if a.tracerShutdownFunc != nil {
-		items = append(items, shutdownItem{name: "tracer", fn: a.tracerShutdownFunc})
+		items = append(items, shutdownItem{name: "trace provider", fn: a.tracerShutdownFunc})
 	}
 	if a.alertShutdownFunc != nil {
-		items = append(items, shutdownItem{name: "alert", fn: a.alertShutdownFunc})
+		items = append(items, shutdownItem{name: "alert provider", fn: a.alertShutdownFunc})
 	}
 	if a.dbConn != nil {
 		items = append(items, shutdownItem{name: "database connection", fn: a.dbConn.Close})
@@ -74,7 +74,7 @@ func (a *app) runShutdown(operation string, items []shutdownItem) {
 					"component", name,
 					"operation", operation,
 					"duration", time.Since(start),
-				).Info("shutdown succeeded")
+				).Info("")
 			}
 		})
 	}

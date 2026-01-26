@@ -1,4 +1,4 @@
-package create_superadmin
+package createsuperadmin
 
 import (
 	"context"

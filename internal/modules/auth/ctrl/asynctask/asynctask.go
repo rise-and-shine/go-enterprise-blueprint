@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/code19m/errx"
+	"github.com/rise-and-shine/pkg/observability/logger"
 	"github.com/rise-and-shine/pkg/pg/hooks"
 	"github.com/rise-and-shine/pkg/taskmill/scheduler"
 	"github.com/rise-and-shine/pkg/taskmill/worker"
@@ -25,7 +26,7 @@ func NewController(
 	queueName string,
 	usecaseContainer *usecase.Container,
 ) (*Controller, error) {
-	worker, err := worker.New(dbConn, queueName)
+	worker, err := worker.New(dbConn, queueName, worker.WithPollInterval(5*time.Second))
 	if err != nil {
 		return nil, errx.Wrap(err)
 	}
@@ -59,7 +60,14 @@ func (c *Controller) Start() error {
 	ctx := context.Background()
 
 	g.Go(func() error { return c.worker.Start(ctx) })
+	logger.
+		With("module", "auth").
+		Info("taskmill worker is running . . .")
+
 	g.Go(func() error { return c.scheduler.Start(ctx) })
+	logger.
+		With("module", "auth").
+		Info("taskmill scheduler is running . . .")
 
 	err := g.Wait()
 	return errx.Wrap(err)
@@ -78,7 +86,7 @@ func (c *Controller) Shutdown() error {
 
 func (c *Controller) registerTasks() {
 	// Register async tasks here...
-	// c.worker.RegisterAsyncTask(c.usecaseContainer.SomeAsyncTask())
+	// worker.ForwardToAsyncTask(c.worker, c.usecaseContainer.SomeAsyncTask())
 }
 
 func (c *Controller) registerSchedules() error {

@@ -10,7 +10,7 @@ import (
 // It acts as a dependency injection container for the domain layer.
 type Container struct {
 	adminRepo           user.AdminRepo
-	sessionRepo         session.SessionRepo
+	sessionRepo         session.Repo
 	roleRepo            rbac.RoleRepo
 	rolePermissionRepo  rbac.RolePermissionRepo
 	actorRoleRepo       rbac.ActorRoleRepo
@@ -19,7 +19,7 @@ type Container struct {
 
 func NewContainer(
 	adminRepo user.AdminRepo,
-	sessionRepo session.SessionRepo,
+	sessionRepo session.Repo,
 	roleRepo rbac.RoleRepo,
 	rolePermissionRepo rbac.RolePermissionRepo,
 	actorRoleRepo rbac.ActorRoleRepo,
@@ -39,7 +39,7 @@ func (c *Container) AdminRepo() user.AdminRepo {
 	return c.adminRepo
 }
 
-func (c *Container) SessionRepo() session.SessionRepo {
+func (c *Container) SessionRepo() session.Repo {
 	return c.sessionRepo
 }
 

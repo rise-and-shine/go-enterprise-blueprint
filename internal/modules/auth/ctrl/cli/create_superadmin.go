@@ -1,10 +1,11 @@
+//nolint:forbidigo // using fmt.Printf is allowed for CLI commands
 package cli
 
 import (
 	"bufio"
 	"context"
 	"fmt"
-	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/create_superadmin"
+	"go-enterprise-blueprint/internal/modules/auth/usecase/admin/createsuperadmin"
 	"os"
 	"strings"
 	"syscall"
@@ -40,7 +41,7 @@ func (c *Controller) CreateSuperadminCmd() error {
 	// Set trace ID to context
 	ctx = context.WithValue(ctx, meta.TraceID, tracing.GetStartingTraceID(ctx))
 
-	err = c.usecaseContainer.CreateSuperadmin().Execute(ctx, create_superadmin.Input{
+	err = c.usecaseContainer.CreateSuperadmin().Execute(ctx, createsuperadmin.Input{
 		Username: username,
 		Password: password,
 	})
@@ -82,7 +83,7 @@ func askPassword() (string, error) {
 
 	for {
 		fmt.Print("Enter password: ")
-		passwordBytes, err := term.ReadPassword(int(syscall.Stdin))
+		passwordBytes, err := term.ReadPassword(syscall.Stdin)
 		if err != nil {
 			return "", errx.Wrap(err)
 		}
