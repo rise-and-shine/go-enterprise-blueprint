@@ -2,7 +2,6 @@ package createsuperadmin
 
 import (
 	"context"
-
 	"go-enterprise-blueprint/internal/modules/auth/domain"
 	"go-enterprise-blueprint/internal/modules/auth/domain/rbac"
 	"go-enterprise-blueprint/internal/modules/auth/domain/user"

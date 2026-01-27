@@ -698,3 +698,5 @@ erDiagram
 | **Invoicing**  | 4      | Invoices, payments, allocations                                       |
 
 **Total: 53 tables**
+
+**Go to https://mermaid.live to view the diagram in a comfortable way**
