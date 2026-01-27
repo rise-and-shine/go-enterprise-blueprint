@@ -3,11 +3,6 @@
 title: RBAC Module - Entity Relationship Diagram
 ---
 erDiagram
-    %% ===========================================
-    %% ROLE-BASED PATH (indirect permissions)
-    %% Actor -> ActorRole -> Role -> RolePermission
-    %% ===========================================
-
     roles {
         bigint id PK
         actor_type actor_type "user|admin|service_acc"
@@ -31,11 +26,6 @@ erDiagram
         timestamp created_at
     }
 
-    %% ===========================================
-    %% DIRECT PATH (bypasses roles)
-    %% Actor -> ActorPermission
-    %% ===========================================
-
     actor_permissions {
         bigint id PK
         actor_type actor_type
@@ -43,10 +33,6 @@ erDiagram
         varchar permission
         timestamp created_at
     }
-
-    %% ===========================================
-    %% RELATIONSHIPS
-    %% ===========================================
 
     roles ||--o{ role_permissions : "grants"
     roles ||--o{ actor_roles : "assigned via"
