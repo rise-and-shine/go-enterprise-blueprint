@@ -6,14 +6,19 @@ import (
 	"github.com/rise-and-shine/pkg/pg"
 )
 
+const (
+	CodeAdminNotFound         = "ADMIN_NOT_FOUND"
+	CodeAdminUsernameConflict = "USERNAME_CONFLICT"
+)
+
 type Admin struct {
 	pg.BaseModel
 
-	ID           string `json:"id"`
+	ID string `json:"id" bun:"id,pk,autoincrement"`
+
 	Username     string `json:"username"`
 	PasswordHash string `json:"-"`
 
-	IsSuperadmin bool       `json:"is_superadmin"`
 	IsActive     bool       `json:"is_active"`
 	LastActiveAt *time.Time `json:"last_active_at"`
 }

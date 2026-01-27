@@ -3,6 +3,7 @@ package domain
 import (
 	"go-enterprise-blueprint/internal/modules/auth/domain/rbac"
 	"go-enterprise-blueprint/internal/modules/auth/domain/session"
+	"go-enterprise-blueprint/internal/modules/auth/domain/uow"
 	"go-enterprise-blueprint/internal/modules/auth/domain/user"
 )
 
@@ -15,6 +16,7 @@ type Container struct {
 	rolePermissionRepo  rbac.RolePermissionRepo
 	actorRoleRepo       rbac.ActorRoleRepo
 	actorPermissionRepo rbac.ActorPermissionRepo
+	uowFactory          uow.Factory
 }
 
 func NewContainer(
@@ -24,14 +26,16 @@ func NewContainer(
 	rolePermissionRepo rbac.RolePermissionRepo,
 	actorRoleRepo rbac.ActorRoleRepo,
 	actorPermissionRepo rbac.ActorPermissionRepo,
+	uowFactory uow.Factory,
 ) *Container {
 	return &Container{
-		adminRepo:           adminRepo,
-		sessionRepo:         sessionRepo,
-		roleRepo:            roleRepo,
-		rolePermissionRepo:  rolePermissionRepo,
-		actorRoleRepo:       actorRoleRepo,
-		actorPermissionRepo: actorPermissionRepo,
+		adminRepo,
+		sessionRepo,
+		roleRepo,
+		rolePermissionRepo,
+		actorRoleRepo,
+		actorPermissionRepo,
+		uowFactory,
 	}
 }
 
@@ -57,4 +61,8 @@ func (c *Container) ActorRoleRepo() rbac.ActorRoleRepo {
 
 func (c *Container) ActorPermissionRepo() rbac.ActorPermissionRepo {
 	return c.actorPermissionRepo
+}
+
+func (c *Container) UOWFactory() uow.Factory {
+	return c.uowFactory
 }

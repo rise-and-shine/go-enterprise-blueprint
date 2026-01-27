@@ -7,18 +7,12 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const (
-	ActorRoleNotFoundCode = "ACTOR_ROLE_NOT_FOUND"
-)
-
 func NewActorRoleRepo(idb bun.IDB) rbac.ActorRoleRepo {
-	return repogen.NewPgRepo[rbac.ActorRole, rbac.ActorRoleFilter](
-		idb,
-		"actor_role",
-		ActorRoleNotFoundCode,
-		nil,
-		actorRoleFilterFunc,
-	)
+	return repogen.NewPgRepoBuilder[rbac.ActorRole, rbac.ActorRoleFilter](idb).
+		WithSchemaName(schemaName).
+		WithNotFoundCode(rbac.CodeActorRoleNotFound).
+		WithFilterFunc(actorRoleFilterFunc).
+		Build()
 }
 
 func actorRoleFilterFunc(q *bun.SelectQuery, f rbac.ActorRoleFilter) *bun.SelectQuery {

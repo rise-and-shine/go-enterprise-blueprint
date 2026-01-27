@@ -16,10 +16,10 @@ Updates an existing admin's information, optionally including password change.
 
 ```json
 {
-    "id": "uuid-string",         // required
-    "username": "string",        // optional, 3-50 chars, unique if provided
-    "password": "string",        // optional, min 8 chars if provided
-    "is_superadmin": false       // optional
+  "id": "uuid-string", // required
+  "username": "string", // optional, 3-50 chars, unique if provided
+  "password": "string", // optional, min 8 chars if provided
+  "is_superadmin": false // optional
 }
 ```
 
@@ -27,11 +27,11 @@ Updates an existing admin's information, optionally including password change.
 
 ```json
 {
-    "id": "uuid-string",
-    "username": "string",
-    "is_superadmin": false,
-    "is_active": true,
-    "updated_at": "2024-01-01T00:00:00Z"
+  "id": "uuid-string",
+  "username": "string",
+  "is_superadmin": false,
+  "is_active": true,
+  "updated_at": "2024-01-01T00:00:00Z"
 }
 ```
 

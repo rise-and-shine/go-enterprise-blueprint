@@ -7,26 +7,23 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const (
-	RoleNotFoundCode     = "ROLE_NOT_FOUND"
-	RoleNameConflictCode = "ROLE_NAME_EXISTS"
-)
-
 func NewRoleRepo(idb bun.IDB) rbac.RoleRepo {
-	return repogen.NewPgRepo[rbac.Role, rbac.RoleFilter](
-		idb,
-		"role",
-		RoleNotFoundCode,
-		map[string]string{
-			"roles_name_key": RoleNameConflictCode,
-		},
-		roleFilterFunc,
-	)
+	return repogen.NewPgRepoBuilder[rbac.Role, rbac.RoleFilter](idb).
+		WithSchemaName(schemaName).
+		WithNotFoundCode(rbac.CodeRoleNotFound).
+		WithConflictCodesMap(map[string]string{
+			"roles_name_key": rbac.CodeRoleNameConflict,
+		}).
+		WithFilterFunc(roleFilterFunc).
+		Build()
 }
 
 func roleFilterFunc(q *bun.SelectQuery, f rbac.RoleFilter) *bun.SelectQuery {
 	if f.ID != nil {
 		q = q.Where("id = ?", *f.ID)
+	}
+	if f.ActorType != nil {
+		q = q.Where("actor_type = ?", *f.ActorType)
 	}
 	if f.Name != nil {
 		q = q.Where("name = ?", *f.Name)

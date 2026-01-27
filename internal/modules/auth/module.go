@@ -58,6 +58,7 @@ func New(
 		postgres.NewRolePermissionRepo(dbConn),
 		postgres.NewActorRoleRepo(dbConn),
 		postgres.NewActorPermissionRepo(dbConn),
+		postgres.NewUOWFactory(dbConn),
 	)
 
 	// Init use cases
@@ -98,13 +99,13 @@ func (m *Module) Start() error {
 }
 
 func (m *Module) Shutdown() error {
-	errs := make(chan error, 2)
+	errs := make(chan error, 2) // buffer size == controller count
 
 	go func() { errs <- m.asynctaskCTRL.Shutdown() }()
 
 	go func() { errs <- m.consumerCTRL.Shutdown() }()
 
-	return errx.Wrap(errors.Join(<-errs, <-errs))
+	return errx.Wrap(errors.Join(<-errs, <-errs)) // <-errs count == controller count
 }
 
 // --- CLI commands of auth module ---

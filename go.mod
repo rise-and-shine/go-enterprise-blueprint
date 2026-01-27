@@ -5,8 +5,9 @@ go 1.25.3
 require (
 	github.com/code19m/errx v0.3.3
 	github.com/gofiber/fiber/v2 v2.52.10
+	github.com/google/uuid v1.6.0
 	github.com/pressly/goose/v3 v3.26.0
-	github.com/rise-and-shine/pkg v1.8.4
+	github.com/rise-and-shine/pkg v1.8.7
 	github.com/spf13/cobra v1.10.1
 	github.com/uptrace/bun v1.2.16
 	golang.org/x/sync v0.18.0
@@ -34,7 +35,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.28.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

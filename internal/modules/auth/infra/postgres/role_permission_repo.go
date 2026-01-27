@@ -7,18 +7,12 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const (
-	RolePermissionNotFoundCode = "ROLE_PERMISSION_NOT_FOUND"
-)
-
 func NewRolePermissionRepo(idb bun.IDB) rbac.RolePermissionRepo {
-	return repogen.NewPgRepo[rbac.RolePermission, rbac.RolePermissionFilter](
-		idb,
-		"role_permission",
-		RolePermissionNotFoundCode,
-		nil,
-		rolePermissionFilterFunc,
-	)
+	return repogen.NewPgRepoBuilder[rbac.RolePermission, rbac.RolePermissionFilter](idb).
+		WithSchemaName(schemaName).
+		WithNotFoundCode(rbac.CodeRolePermissionNotFound).
+		WithFilterFunc(rolePermissionFilterFunc).
+		Build()
 }
 
 func rolePermissionFilterFunc(q *bun.SelectQuery, f rbac.RolePermissionFilter) *bun.SelectQuery {

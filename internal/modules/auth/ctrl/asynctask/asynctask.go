@@ -76,12 +76,12 @@ func (c *Controller) Start() error {
 // Shutdown parallelly stops taskmill worker and scheduler gracefully and
 // blocks until both of them are done.
 func (c *Controller) Shutdown() error {
-	errs := make(chan error, 2)
+	errs := make(chan error, 2) // buffer size == controller count
 
 	go func() { errs <- c.worker.Stop() }()
 	go func() { errs <- c.scheduler.Stop() }()
 
-	return errx.Wrap(errors.Join(<-errs, <-errs))
+	return errx.Wrap(errors.Join(<-errs, <-errs)) // <-errs count == controller count
 }
 
 func (c *Controller) registerTasks() {

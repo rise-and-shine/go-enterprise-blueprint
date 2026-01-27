@@ -7,18 +7,12 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const (
-	ActorPermissionNotFoundCode = "ACTOR_PERMISSION_NOT_FOUND"
-)
-
 func NewActorPermissionRepo(idb bun.IDB) rbac.ActorPermissionRepo {
-	return repogen.NewPgRepo[rbac.ActorPermission, rbac.ActorPermissionFilter](
-		idb,
-		"actor_permission",
-		ActorPermissionNotFoundCode,
-		nil,
-		actorPermissionFilterFunc,
-	)
+	return repogen.NewPgRepoBuilder[rbac.ActorPermission, rbac.ActorPermissionFilter](idb).
+		WithSchemaName(schemaName).
+		WithNotFoundCode(rbac.CodeActorPermissionNotFound).
+		WithFilterFunc(actorPermissionFilterFunc).
+		Build()
 }
 
 func actorPermissionFilterFunc(q *bun.SelectQuery, f rbac.ActorPermissionFilter) *bun.SelectQuery {

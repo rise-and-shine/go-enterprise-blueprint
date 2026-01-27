@@ -3,10 +3,9 @@ package user
 import "github.com/rise-and-shine/pkg/repogen"
 
 type AdminFilter struct {
-	ID           *string
-	Username     *string
-	IsSuperadmin *bool
-	IsActive     *bool
+	ID       *string
+	Username *string
+	IsActive *bool
 
 	Limit  int
 	Offset int

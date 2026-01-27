@@ -6,10 +6,15 @@ import (
 	"github.com/rise-and-shine/pkg/pg"
 )
 
+const (
+	CodeSessionNotFound = "SESSION_NOT_FOUND"
+)
+
 type Session struct {
 	pg.BaseModel
 
-	ID        int64  `json:"id"`
+	ID int64 `json:"id" bun:"id,pk,autoincrement"`
+
 	ActorType string `json:"actor_type"`
 	ActorID   string `json:"actor_id"`
 

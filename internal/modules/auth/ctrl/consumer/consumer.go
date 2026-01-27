@@ -65,7 +65,7 @@ func (c *Controller) Shutdown() error {
 	// Stop your consumers here...
 	// go func() { errs <- c.someConsumer.Stop() }()
 
-	// return errx.Wrap(errors.Join(<-errs))
+	// return errx.Wrap(errors.Join(<-errs)) // <-errs count == consumer count
 	return nil
 }
 

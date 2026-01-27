@@ -6,10 +6,16 @@ Creates the initial superadmin account for system bootstrap. This command should
 
 > **operation-id**: `create-superadmin`
 
-> **usage**: `app create-superadmin --username <username> --password <password>`
+> **usage**: `./app auth create-superadmin`
 
 ## Execute
 
-- Hash the password using bcrypt
+- Hash the password
 
-- Create admin record with `is_superadmin=true`
+- Start UOW
+
+- Create admin
+
+- Create actor permission with superadmin permission
+
+- Apply UOW

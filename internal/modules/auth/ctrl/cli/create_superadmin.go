@@ -41,12 +41,16 @@ func (c *Controller) CreateSuperadminCmd() error {
 	// Set trace ID to context
 	ctx = context.WithValue(ctx, meta.TraceID, tracing.GetStartingTraceID(ctx))
 
-	err = c.usecaseContainer.CreateSuperadmin().Execute(ctx, createsuperadmin.Input{
+	err = c.usecaseContainer.CreateSuperadmin().Execute(ctx, &createsuperadmin.Input{
 		Username: username,
 		Password: password,
 	})
+	if err != nil {
+		return errx.Wrap(err)
+	}
 
-	return errx.Wrap(err)
+	fmt.Println("Superadmin created successfully")
+	return nil
 }
 
 func askUsername(reader *bufio.Reader) (string, error) {
@@ -56,7 +60,7 @@ func askUsername(reader *bufio.Reader) (string, error) {
 	)
 
 	for {
-		fmt.Print("Enter username: ")
+		fmt.Print("\nEnter username: ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			return "", errx.Wrap(err)
@@ -82,7 +86,7 @@ func askPassword() (string, error) {
 	)
 
 	for {
-		fmt.Print("Enter password: ")
+		fmt.Print("\nEnter password: ")
 		passwordBytes, err := term.ReadPassword(syscall.Stdin)
 		if err != nil {
 			return "", errx.Wrap(err)

@@ -6,6 +6,14 @@ import (
 	"github.com/rise-and-shine/pkg/pg"
 )
 
+const (
+	CodeRoleNotFound            = "ROLE_NOT_FOUND"
+	CodeRoleNameConflict        = "ROLE_NAME_CONFLICT"
+	CodeRolePermissionNotFound  = "ROLE_PERMISSION_NOT_FOUND"
+	CodeActorRoleNotFound       = "ACTOR_ROLE_NOT_FOUND"
+	CodeActorPermissionNotFound = "ACTOR_PERMISSION_NOT_FOUND"
+)
+
 type ActorType string
 
 func (at ActorType) IsValid() bool {
@@ -23,7 +31,9 @@ const (
 type Role struct {
 	pg.BaseModel
 
-	ID int64 `json:"id"`
+	ID int64 `json:"id" bun:"id,pk,autoincrement"`
+
+	ActorType ActorType `json:"actor_type"`
 
 	// Name is a unique name of the role
 	Name string `json:"name"`
@@ -32,7 +42,7 @@ type Role struct {
 type RolePermission struct {
 	pg.BaseModel
 
-	ID int64 `json:"id"`
+	ID int64 `json:"id" bun:"id,pk,autoincrement"`
 
 	RoleID     int64  `json:"role_id"`
 	Permission string `json:"permission"`
@@ -41,7 +51,7 @@ type RolePermission struct {
 type ActorRole struct {
 	pg.BaseModel
 
-	ID int64 `json:"id"`
+	ID int64 `json:"id" bun:"id,pk,autoincrement"`
 
 	ActorType ActorType `json:"actor_type"`
 	ActorID   string    `json:"actor_id"`
@@ -52,7 +62,7 @@ type ActorRole struct {
 type ActorPermission struct {
 	pg.BaseModel
 
-	ID int64 `json:"id"`
+	ID int64 `json:"id" bun:"id,pk,autoincrement"`
 
 	ActorType ActorType `json:"actor_type"`
 	ActorID   string    `json:"actor_id"`

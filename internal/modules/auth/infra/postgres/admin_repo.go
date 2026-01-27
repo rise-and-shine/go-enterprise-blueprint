@@ -7,21 +7,15 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const (
-	AdminNotFoundCode     = "ADMIN_NOT_FOUND"
-	AdminUsernameConflict = "USERNAME_EXISTS"
-)
-
 func NewAdminRepo(idb bun.IDB) user.AdminRepo {
-	return repogen.NewPgRepo[user.Admin, user.AdminFilter](
-		idb,
-		"admin",
-		AdminNotFoundCode,
-		map[string]string{
-			"admins_username_key": AdminUsernameConflict,
-		},
-		adminFilterFunc,
-	)
+	return repogen.NewPgRepoBuilder[user.Admin, user.AdminFilter](idb).
+		WithSchemaName(schemaName).
+		WithNotFoundCode(user.CodeAdminNotFound).
+		WithConflictCodesMap(map[string]string{
+			"admins_username_key": user.CodeAdminUsernameConflict,
+		}).
+		WithFilterFunc(adminFilterFunc).
+		Build()
 }
 
 func adminFilterFunc(q *bun.SelectQuery, f user.AdminFilter) *bun.SelectQuery {
@@ -30,9 +24,6 @@ func adminFilterFunc(q *bun.SelectQuery, f user.AdminFilter) *bun.SelectQuery {
 	}
 	if f.Username != nil {
 		q = q.Where("username = ?", *f.Username)
-	}
-	if f.IsSuperadmin != nil {
-		q = q.Where("is_superadmin = ?", *f.IsSuperadmin)
 	}
 	if f.IsActive != nil {
 		q = q.Where("is_active = ?", *f.IsActive)

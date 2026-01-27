@@ -7,18 +7,12 @@ import (
 	"github.com/uptrace/bun"
 )
 
-const (
-	SessionNotFoundCode = "SESSION_NOT_FOUND"
-)
-
 func NewSessionRepo(idb bun.IDB) session.Repo {
-	return repogen.NewPgRepo[session.Session, session.Filter](
-		idb,
-		"session",
-		SessionNotFoundCode,
-		nil,
-		sessionFilterFunc,
-	)
+	return repogen.NewPgRepoBuilder[session.Session, session.Filter](idb).
+		WithSchemaName(schemaName).
+		WithNotFoundCode(session.CodeSessionNotFound).
+		WithFilterFunc(sessionFilterFunc).
+		Build()
 }
 
 func sessionFilterFunc(q *bun.SelectQuery, f session.Filter) *bun.SelectQuery {

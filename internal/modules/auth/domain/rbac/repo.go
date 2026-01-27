@@ -3,9 +3,10 @@ package rbac
 import "github.com/rise-and-shine/pkg/repogen"
 
 type RoleFilter struct {
-	ID   *int64
-	Name *string
-	IDs  []int64
+	ID        *int64
+	ActorType *ActorType
+	Name      *string
+	IDs       []int64
 
 	Limit  int
 	Offset int

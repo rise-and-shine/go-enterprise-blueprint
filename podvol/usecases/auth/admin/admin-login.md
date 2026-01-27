@@ -16,8 +16,8 @@ Authenticates an admin user and creates a session with access and refresh tokens
 
 ```json
 {
-    "username": "string", // required, 3-50 chars
-    "password": "string"  // required, min 8 chars
+  "username": "string", // required, 3-50 chars
+  "password": "string" // required, min 8 chars
 }
 ```
 
@@ -25,19 +25,19 @@ Authenticates an admin user and creates a session with access and refresh tokens
 
 ```json
 {
-    "admin": {
-        "id": "string",
-        "username": "string",
-        "is_superadmin": true,
-        "is_active": true,
-        "last_active_at": "2024-01-01T00:00:00Z"
-    },
-    "session": {
-        "access_token": "string",
-        "access_token_expires_at": "2024-01-01T01:00:00Z",
-        "refresh_token": "string",
-        "refresh_token_expires_at": "2024-01-08T00:00:00Z"
-    }
+  "admin": {
+    "id": "string",
+    "username": "string",
+    "is_superadmin": true,
+    "is_active": true,
+    "last_active_at": "2024-01-01T00:00:00Z"
+  },
+  "session": {
+    "access_token": "string",
+    "access_token_expires_at": "2024-01-01T01:00:00Z",
+    "refresh_token": "string",
+    "refresh_token_expires_at": "2024-01-08T00:00:00Z"
+  }
 }
 ```
 

@@ -76,7 +76,7 @@ docs/
 ├── integrations/       # External integration documentation
 ├── uml/                # UML diagrams referenced from markdown files
 ├── misc/               # Miscellaneous files (PDFs, references)
-└── gen/dbdocs/         # Generated database documentation (tbls)
+└── gen/dbdocs/         # ? Generated database documentation (tbls)
 ```
 
 We follow a **document-first approach**: documentation serves as the specification, and implementation follows the documentation.
